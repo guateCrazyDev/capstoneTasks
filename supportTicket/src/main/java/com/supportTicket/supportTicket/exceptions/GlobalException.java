@@ -19,6 +19,12 @@ public class GlobalException {
 		return new ResponseEntity<>(exc.getMessage(),HttpStatus.NOT_FOUND);
 	}
 	
+	@ExceptionHandler(ImageNotFoundException.class)
+	public ResponseEntity<String> imageNotFoundException(
+			ImageNotFoundException exc){
+		return new ResponseEntity<>(exc.getMessage(),HttpStatus.BAD_REQUEST);
+	}
+	
 	@ExceptionHandler(RuntimeException.class)
 	public ResponseEntity<String> exception(RuntimeException ex){
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);

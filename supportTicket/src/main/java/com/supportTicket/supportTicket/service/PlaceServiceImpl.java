@@ -28,6 +28,8 @@ import com.supportTicket.supportTicket.records.PicturesPlaceRecord;
 import com.supportTicket.supportTicket.records.PlaceRecord;
 import com.supportTicket.supportTicket.records.UserRecord;
 import com.supportTicket.supportTicket.repository.CategoryRepo;
+import com.supportTicket.supportTicket.repository.CommentsRepo;
+import com.supportTicket.supportTicket.repository.PicturesCommentsRepo;
 import com.supportTicket.supportTicket.repository.PicturesPlaceRepo;
 import com.supportTicket.supportTicket.repository.PlaceRepo;
 
@@ -39,6 +41,10 @@ public class PlaceServiceImpl implements PlaceService{
 	PlaceRepo placeRepo;
 	@Autowired
 	CategoryRepo catRepo;
+	@Autowired
+	PicturesCommentsRepo picComRepo;
+	@Autowired
+	CommentsRepo commRepo;
 	
 	private final Path fileStorageLocation;
 
@@ -139,6 +145,110 @@ public class PlaceServiceImpl implements PlaceService{
 			return placesR;
 		}else {
 			throw new ElementNotFoundException("There is no places");
+		}
+	}
+	
+	public List<PlaceRecord> getAllByNameCat(String categoryName){
+		if(catRepo.findByCategoryName(categoryName)!=null) {
+			List<Place> places = placeRepo.findByCategory_CategoryName(categoryName); 
+			if(places.size()>0) {
+				List<PlaceRecord> placesR = new ArrayList();
+				for(Place place : places) {
+					List<PicturesPlaceRecord> picsRecord = new ArrayList();
+					for(PicturesPlace pls : place.getPicturesPlace()) {
+						PicturesPlaceRecord picRec = new PicturesPlaceRecord(pls.getPath());
+						picsRecord.add(picRec);
+					}
+					List<CommentRecord> commsRecord = new ArrayList();
+					for(Comments cms : place.getComms()) {
+						List<PictureCommentsRecord> commsRecordPic = new ArrayList();
+						for(PicturesComments picsCom : cms.getPicturesComms()) {
+							PictureCommentsRecord picComRec = new PictureCommentsRecord(picsCom.getPath());
+							commsRecordPic.add(picComRec);
+						}
+						UserRecord userR = new UserRecord(cms.getUser().getUsername()
+								,cms.getUser().getRole());
+						CommentRecord comRec = new CommentRecord(
+								cms.getText(),cms.getRate(),cms.getDate(),commsRecordPic,userR);
+						commsRecord.add(comRec);
+					}
+					PlaceRecord rec = new PlaceRecord(
+							place.getName()
+							,place.getBestTime()
+							,place.getLocation()
+							,picsRecord
+							,place.getCategory().getCategoryName()
+							,commsRecord);
+					placesR.add(rec);
+				}
+				placesR = placesR.stream().sorted(new PlaceNameComparator()).toList();
+				return placesR;
+			}else {
+				throw new ElementNotFoundException("There is no places");
+			}
+		}else {
+			throw new ElementNotFoundException("There Category with that name");
+		}
+	}
+	public PlaceRecord updatePlace (PlaceRecord place,List<MultipartFile> files,String catName,String originalName) {
+		if(placeRepo.findByName(originalName) != null) {
+			if(placeRepo.findByName(originalName) == null) {
+				if(catRepo.findByCategoryName(catName) != null) {
+					Place places = placeRepo.findByName(originalName);
+					Category category = catRepo.findByCategoryName(catName);
+					places.setBestTime(place.bestTime());
+					places.setLocation(place.location());
+					places.setName(place.name());
+					places.setCategory(category);
+					places = placeRepo.save(places);
+					List<PicturesPlace> pics = new ArrayList();
+					for(MultipartFile file : files) {
+						PicturesPlace pic = new PicturesPlace();
+						pic.setPath(storeFile(file));
+						pic.setPlace(places);
+						pic = picturesPlaceRepo.save(pic);
+						pics.add(pic);
+					}
+					places.setPicturesPlace(pics);
+					places = placeRepo.save(places);
+					List<Place> placesCat =  category.getPlaces();
+					placesCat.add(places);
+					category.setPlaces(placesCat);
+					catRepo.save(category);
+					List<PicturesPlaceRecord> picsRecord = new ArrayList();
+					for(PicturesPlace pls : pics) {
+						PicturesPlaceRecord picRec = new PicturesPlaceRecord(pls.getPath());
+						picsRecord.add(picRec);
+					}
+					PlaceRecord recRet = new PlaceRecord(
+					place.name(),place.bestTime(),place.location(),picsRecord,category.getCategoryName(),place.comments());
+					return recRet;
+				}else {
+					throw new ElementNotFoundException("This Category doenst exists");
+				}
+			}else {
+				throw new ElementAlreadyExistsException("This new name of place already exists");
+			}
+		}else {
+			throw new ElementNotFoundException("The place to update doesnt exists");
+		}
+	}
+	
+	public void deletePlace(String placeName) {
+		if(placeRepo.findByName(placeName) != null) {
+			Place place = placeRepo.findByName(placeName);
+			for(Comments comment : place.getComms()) {
+				for(PicturesComments pictureCom : comment.getPicturesComms()) {
+					picComRepo.delete(pictureCom);
+				}
+				commRepo.delete(comment);
+			}
+			for(PicturesPlace picturePla : place.getPicturesPlace()) {
+				picturesPlaceRepo.delete(picturePla);
+			}
+			placeRepo.delete(place);
+		}else {
+			throw new ElementNotFoundException("The place to delete doesnt exists");
 		}
 	}
 }

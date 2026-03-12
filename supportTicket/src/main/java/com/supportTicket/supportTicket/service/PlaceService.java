@@ -9,4 +9,7 @@ import com.supportTicket.supportTicket.records.PlaceRecord;
 public interface PlaceService {
 	PlaceRecord createPlace(PlaceRecord place,List<MultipartFile> files,String catName);
 	List<PlaceRecord> getAllByName();
+	List<PlaceRecord> getAllByNameCat(String categoryName);
+	PlaceRecord updatePlace(PlaceRecord place,List<MultipartFile> files,String catName,String originalName);
+	void deletePlace(String placeName);
 }
