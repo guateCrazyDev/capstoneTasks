@@ -13,6 +13,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.CategoryRecord;
+import com.supportTicket.supportTicket.records.UserRecord;
+import com.supportTicket.supportTicket.records.UserRecordResponse;
 import com.supportTicket.supportTicket.records.UserRequestRecord;
 import com.supportTicket.supportTicket.security.JwtTokenUtil;
 import com.supportTicket.supportTicket.service.UserService;
@@ -74,10 +76,15 @@ public class AuthController {
 		return "User already exist";
 	}
 	
-	@PutMapping("update")
+	@PutMapping("/update")
 	public ResponseEntity<Boolean> updateUser(@RequestParam("originalUser") String originalUser,@RequestParam("newUser") String newUser,@RequestParam("img") MultipartFile img){
 		userService.updateUser(originalUser,newUser,img);
 		return new ResponseEntity<>(true,HttpStatus.CREATED);
 	}
-
+	
+	@GetMapping("/user/{userName}")
+	public ResponseEntity<UserRecordResponse> getUserInfo(@PathVariable String userName){
+		UserRecordResponse response = userService.getUserInfo(userName);
+		return new ResponseEntity<>(response,HttpStatus.OK);
+	}
 }

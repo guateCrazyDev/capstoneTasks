@@ -11,6 +11,7 @@ import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.exceptions.ImageNotFoundException;
 import com.supportTicket.supportTicket.model.Category;
 import com.supportTicket.supportTicket.model.User;
+import com.supportTicket.supportTicket.records.UserRecordResponse;
 import com.supportTicket.supportTicket.repository.UserRepo;
 
 @Service
@@ -50,6 +51,17 @@ public class UserServiceImpl implements UserService{
 		}
     	}else {
     		throw new ElementNotFoundException("This user not exists");
+    	}
+    }
+    
+    public UserRecordResponse getUserInfo(String userName) {
+    	Optional<User> userBase = userRepository.findByUsername(userName);
+    	User userRes = userBase.get();
+    	if(userRes != null) {
+    		UserRecordResponse response = new UserRecordResponse(userName, userRes.getRole(), userRes.getImg());
+    		return response;
+    	}else {
+    		throw new ElementNotFoundException("User not found");
     	}
     }
 }
