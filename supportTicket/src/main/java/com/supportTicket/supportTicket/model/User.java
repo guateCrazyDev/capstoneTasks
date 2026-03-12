@@ -8,6 +8,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.Lob;
 import jakarta.persistence.OneToMany;
 
 @Entity
@@ -24,18 +25,22 @@ public class User {
 	@OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("user-comments")
 	private List<Comments> comms;
+	@Lob
+    @Column(columnDefinition = "LONGBLOB")
+    private byte[] img;
 	
 	public User() {
 		super();
 	}
 	
-	public User(Long id, String username, String password, String role, List<Comments> comms) {
+	public User(Long id, String username, String password, String role, List<Comments> comms, byte[] img) {
 		super();
 		this.id = id;
 		this.username = username;
 		this.password = password;
 		this.role = role;
 		this.comms = comms;
+		this.img = img;
 	}
 	
 	public Long getId() {
@@ -67,5 +72,11 @@ public class User {
 	}
 	public void setComms(List<Comments> comms) {
 		this.comms = comms;
+	}
+	public byte[] getImg() {
+		return img;
+	}
+	public void setImg(byte[] img) {
+		this.img = img;
 	}
 }

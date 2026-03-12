@@ -2,9 +2,12 @@ package com.supportTicket.supportTicket.service;
 
 import java.util.Optional;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.supportTicket.supportTicket.model.User;
 
 public interface UserService {
 	Optional<User> findByUsername(String username);
     User saveUser(User user);
+	boolean updateUser(String userOg,String newUser,MultipartFile img); 
 }
