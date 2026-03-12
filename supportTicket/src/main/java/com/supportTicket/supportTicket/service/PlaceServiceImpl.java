@@ -237,15 +237,6 @@ public class PlaceServiceImpl implements PlaceService{
 	public void deletePlace(String placeName) {
 		if(placeRepo.findByName(placeName) != null) {
 			Place place = placeRepo.findByName(placeName);
-			for(Comments comment : place.getComms()) {
-				for(PicturesComments pictureCom : comment.getPicturesComms()) {
-					picComRepo.delete(pictureCom);
-				}
-				commRepo.delete(comment);
-			}
-			for(PicturesPlace picturePla : place.getPicturesPlace()) {
-				picturesPlaceRepo.delete(picturePla);
-			}
 			placeRepo.delete(place);
 		}else {
 			throw new ElementNotFoundException("The place to delete doesnt exists");
