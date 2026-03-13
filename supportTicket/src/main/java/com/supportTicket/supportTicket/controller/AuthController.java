@@ -48,6 +48,7 @@ public class AuthController {
 			User useRes = useResOp.get();
 			response.setJwt(jwt);
 			response.setRole(useRes.getRole());
+			response.setUsername(useRes.getUsername());
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (AuthenticationException e) {
 			return new ResponseEntity<>("Invalid credentials", HttpStatus.NOT_FOUND);
