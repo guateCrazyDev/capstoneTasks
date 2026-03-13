@@ -49,6 +49,7 @@ public class AuthController {
 			response.setJwt(jwt);
 			response.setRole(useRes.getRole());
 			response.setUsername(useRes.getUsername());
+			response.setImg(useRes.getImg());
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (AuthenticationException e) {
 			return new ResponseEntity<>("Invalid credentials", HttpStatus.NOT_FOUND);
@@ -80,7 +81,7 @@ public class AuthController {
 
 	@PutMapping("/update")
 	public ResponseEntity<Boolean> updateUser(@RequestParam("originalUser") String originalUser,
-			@RequestParam("newUser") String newUser, @RequestParam("img") MultipartFile img) {
+			@RequestParam("newUser") String newUser, @RequestParam(value="img", required=false) MultipartFile img) {
 		userService.updateUser(originalUser, newUser, img);
 		return new ResponseEntity<>(true, HttpStatus.CREATED);
 	}
