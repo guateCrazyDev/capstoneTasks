@@ -25,6 +25,7 @@ public class CategoryServiceImpl implements CategoryService{
 			try {
 				Category category = new Category();
 				category.setCategoryName(catRec.categoryName());
+				category.setDescription(catRec.description());
 				category.setImg(img.getBytes());
 				categoryRepo.save(category);
 				return catRec;
@@ -41,7 +42,7 @@ public class CategoryServiceImpl implements CategoryService{
 		if(categories.size() > 0) {
 			List<CategoryRecord> catsRec = new ArrayList();
 			for(Category cat : categories) {
-				CategoryRecord catR = new CategoryRecord(cat.getCategoryName(),cat.getImg());
+				CategoryRecord catR = new CategoryRecord(cat.getCategoryName(),cat.getDescription(),cat.getImg());
 				catsRec.add(catR);
 			}
 			return catsRec.stream().sorted(new CategoryNameComparator()).toList();
