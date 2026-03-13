@@ -17,6 +17,7 @@ public class Category {
 	@GeneratedValue(strategy=GenerationType.IDENTITY)
 	private Long id;
 	private String categoryName;
+	private String description;
 	@OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("category-places")
 	private List<Place> places;
@@ -28,10 +29,11 @@ public class Category {
 		super();
 	}
 	
-	public Category(Long id, String categoryName, List<Place> places, byte[] img) {
+	public Category(Long id, String categoryName, String description, List<Place> places, byte[] img) {
 		super();
 		this.id = id;
 		this.categoryName = categoryName;
+		this.description = description;
 		this.places = places;
 		this.img = img;
 	}
@@ -59,5 +61,11 @@ public class Category {
 	}
 	public void setImg(byte[] img) {
 		this.img = img;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }
