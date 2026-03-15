@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.supportTicket.supportTicket.records.PlaceLigthRecord;
 import com.supportTicket.supportTicket.records.PlaceRecord;
 import com.supportTicket.supportTicket.service.PlaceService;
 
@@ -48,6 +49,18 @@ public class PlaceController {
 	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(@PathVariable String categoryName){
 		List<PlaceRecord> places = placeService.getAllByNameCat(categoryName);
 		return new ResponseEntity<>(places,HttpStatus.OK);
+	}
+	
+	@GetMapping("/place/ligth/{categoryName}")
+	public ResponseEntity<List<PlaceLigthRecord>> getAllPlacesByCatLigth(@PathVariable String categoryName){
+		List<PlaceLigthRecord> places = placeService.getAllByNameCatLigth(categoryName);
+		return new ResponseEntity<>(places,HttpStatus.OK);
+	}
+	
+	@GetMapping("/place/{placeName}")
+	public ResponseEntity<PlaceRecord> getPlacebyName(@PathVariable String placeName){
+		PlaceRecord response = placeService.getPlaceByName(placeName); 
+		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	
 	@PutMapping(value = "/place"
