@@ -50,4 +50,13 @@ public class CategoryServiceImpl implements CategoryService{
 			throw new ElementNotFoundException("There is no Categories");
 		}
 	}
+	
+	public CategoryRecord getCategory(String categoryName) {
+		Category category = categoryRepo.findByCategoryName(categoryName);
+		if(category != null) {
+			return new CategoryRecord(category.getCategoryName(),category.getDescription(),category.getImg());
+		}else {
+			throw new ElementNotFoundException("This category not exists");
+		}
+	}
 }

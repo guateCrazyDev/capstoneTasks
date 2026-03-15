@@ -9,4 +9,5 @@ import com.supportTicket.supportTicket.records.CategoryRecord;
 public interface CategoryService {
 	CategoryRecord createCategory(CategoryRecord catRec,MultipartFile img);
 	List<CategoryRecord> getAlls();
+	CategoryRecord getCategory(String categoryName);
 }
