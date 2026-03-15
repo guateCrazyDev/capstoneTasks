@@ -37,7 +37,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public boolean updateUser(String userOg, String newUser, MultipartFile img) {
+	public UserRecordResponse updateUser(String userOg, String newUser, MultipartFile img) {
 
 		Optional<User> userUpdate = userRepository.findByUsername(userOg);
 
@@ -66,7 +66,16 @@ public class UserServiceImpl implements UserService {
 
 			userRepository.save(user);
 
-			return true;
+			String imgUrl = null;
+
+			if (user.getImgPath() != null) {
+				imgUrl = user.getImgPath();
+			}
+
+			return new UserRecordResponse(
+					user.getUsername(),
+					user.getRole(),
+					imgUrl);
 
 		} catch (Exception e) {
 			throw new RuntimeException("Error saving image");

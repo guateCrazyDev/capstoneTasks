@@ -84,14 +84,14 @@ public class AuthController {
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<Boolean> updateUser(
-			@RequestParam("originalUser") String originalUser,
-			@RequestParam("newUser") String newUser,
-			@RequestParam(value = "img", required = false) MultipartFile img) {
+	public ResponseEntity<UserRecordResponse> updateUser(
+			@RequestParam String originalUsername,
+			@RequestParam String newUsername,
+			@RequestParam(required = false) MultipartFile img) {
 
-		userService.updateUser(originalUser, newUser, img);
+		UserRecordResponse response = userService.updateUser(originalUsername, newUsername, img);
 
-		return new ResponseEntity<>(true, HttpStatus.OK);
+		return ResponseEntity.ok(response);
 	}
 
 	@PutMapping("/change-password")
