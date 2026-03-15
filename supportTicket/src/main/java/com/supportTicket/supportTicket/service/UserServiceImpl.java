@@ -38,18 +38,24 @@ public class UserServiceImpl implements UserService {
 
 	public boolean updateUser(String userOg, String newUser, MultipartFile img) {
 		Optional<User> userUpdate = userRepository.findByUsername(userOg);
-		User user = userUpdate.get();
-		if (user != null) {
-			try {
-				user.setUsername(newUser);
-				user.setImg(img.getBytes());
-				userRepository.save(user);
-				return true;
-			} catch (Exception e) {
-				throw new ImageNotFoundException("It was not possible to process the image");
-			}
-		} else {
+
+		if (userUpdate.isEmpty()) {
 			throw new ElementNotFoundException("This user not exists");
+		}
+
+		User user = userUpdate.get();
+		user.setUsername(newUser);
+
+		try {
+			if (img != null && !img.isEmpty()) {
+				user.setImg(img.getBytes());
+			}
+
+			userRepository.save(user);
+			return true;
+
+		} catch (Exception e) {
+			throw new ImageNotFoundException("It was not possible to process the image");
 		}
 	}
 

@@ -23,47 +23,41 @@ import com.supportTicket.supportTicket.service.PlaceService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:5173/")
 public class PlaceController {
 	@Autowired
 	PlaceService placeService;
-	
-	@PostMapping(value = "/place"
-			, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+	@PostMapping(value = "/place", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlaceRecord> createPlace(
-			@RequestPart("placeData") PlaceRecord placeRecord
-			,@RequestPart("files") List<MultipartFile> files
-			,@RequestPart("categoryName") String categoryName){
-		PlaceRecord response = placeService.createPlace(placeRecord,files,categoryName);
-		return new ResponseEntity<>(response,HttpStatus.CREATED);
+			@RequestPart("placeData") PlaceRecord placeRecord, @RequestPart("files") List<MultipartFile> files,
+			@RequestPart("categoryName") String categoryName) {
+		PlaceRecord response = placeService.createPlace(placeRecord, files, categoryName);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-	
+
 	@GetMapping("/place")
-	public ResponseEntity<List<PlaceRecord>> getAllPlaces(){
+	public ResponseEntity<List<PlaceRecord>> getAllPlaces() {
 		List<PlaceRecord> places = placeService.getAllByName();
-		return new ResponseEntity<>(places,HttpStatus.OK);
+		return new ResponseEntity<>(places, HttpStatus.OK);
 	}
-	
+
 	@GetMapping("/place/{categoryName}")
-	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(@PathVariable String categoryName){
+	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(@PathVariable String categoryName) {
 		List<PlaceRecord> places = placeService.getAllByNameCat(categoryName);
-		return new ResponseEntity<>(places,HttpStatus.OK);
+		return new ResponseEntity<>(places, HttpStatus.OK);
 	}
-	
-	@PutMapping(value = "/place"
-			, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+
+	@PutMapping(value = "/place", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlaceRecord> actualizaPlace(
-			@RequestPart("placeData") PlaceRecord placeRecord
-			,@RequestPart("files") List<MultipartFile> files
-			,@RequestPart("categoryName") String categoryName
-			,@RequestPart("originalName") String originalName){
-		PlaceRecord response = placeService.updatePlace(placeRecord,files,categoryName,originalName);
-		return new ResponseEntity<>(response,HttpStatus.CREATED);
+			@RequestPart("placeData") PlaceRecord placeRecord, @RequestPart("files") List<MultipartFile> files,
+			@RequestPart("categoryName") String categoryName, @RequestPart("originalName") String originalName) {
+		PlaceRecord response = placeService.updatePlace(placeRecord, files, categoryName, originalName);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
-	
+
 	@DeleteMapping("/place/{placeName}")
-	public ResponseEntity<String> eliminaPlace(@PathVariable String placeName){
+	public ResponseEntity<String> eliminaPlace(@PathVariable String placeName) {
 		placeService.deletePlace(placeName);
-		return new ResponseEntity<>("Delete successfully!",HttpStatus.OK);
+		return new ResponseEntity<>("Delete successfully!", HttpStatus.OK);
 	}
 }

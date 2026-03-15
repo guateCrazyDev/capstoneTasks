@@ -23,7 +23,6 @@ import com.supportTicket.supportTicket.service.CategoryService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:5173")
 public class CategoryController {
 	@Autowired
 	CategoryService catService;
