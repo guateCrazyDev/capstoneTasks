@@ -8,8 +8,14 @@ import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
 
 public interface UserService {
+
 	Optional<User> findByUsername(String username);
-    User saveUser(User user);
-	boolean updateUser(String userOg,String newUser,MultipartFile img); 
+
+	User saveUser(User user);
+
+	boolean updateUser(String userOg, String newUser, MultipartFile img);
+
+	boolean changePassword(String username, String oldPassword, String newPassword);
+
 	UserRecordResponse getUserInfo(String userName);
 }
