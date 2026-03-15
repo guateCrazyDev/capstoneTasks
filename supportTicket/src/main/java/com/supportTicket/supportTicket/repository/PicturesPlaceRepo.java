@@ -7,6 +7,6 @@ import org.springframework.stereotype.Repository;
 import com.supportTicket.supportTicket.model.PicturesPlace;
 
 @Repository
-public interface PicturesPlaceRepo extends JpaRepository<PicturesPlace,Long>{
-	
+public interface PicturesPlaceRepo extends JpaRepository<PicturesPlace, Long> {
+
 }

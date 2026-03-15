@@ -19,7 +19,6 @@ import com.supportTicket.supportTicket.comparators.CommentDateComparator;
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.model.Comments;
 import com.supportTicket.supportTicket.model.PicturesComments;
-import com.supportTicket.supportTicket.model.PicturesPlace;
 import com.supportTicket.supportTicket.model.Place;
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.CommentRecord;
