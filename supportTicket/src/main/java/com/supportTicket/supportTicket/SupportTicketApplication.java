@@ -12,7 +12,7 @@ public class SupportTicketApplication {
 		Dotenv dotenv = Dotenv.configure().directory("supportTicket\\.env")
 				.load();
 		;
-
+		System.setProperty("PORT", dotenv.get("PORT"));
 		System.setProperty("DB_PASSWORD", dotenv.get("DB_PASSWORD"));
 		System.setProperty("JWT_SECRET", dotenv.get("JWT_SECRET"));
 		SpringApplication.run(SupportTicketApplication.class, args);

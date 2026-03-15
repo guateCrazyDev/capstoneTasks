@@ -10,7 +10,6 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
-import jakarta.persistence.Lob;
 
 @Entity
 public class User implements UserDetails {
@@ -22,17 +21,7 @@ public class User implements UserDetails {
 	private String username;
 	private String password;
 	private String role;
-
-	@Lob
-	private byte[] img;
-
-	public byte[] getImg() {
-		return img;
-	}
-
-	public void setImg(byte[] img) {
-		this.img = img;
-	}
+	private String imgPath;
 
 	public User() {
 	}
@@ -77,7 +66,6 @@ public class User implements UserDetails {
 		return true;
 	}
 
-	// Getters y Setters normales
 	public Long getId() {
 		return id;
 	}
@@ -100,5 +88,13 @@ public class User implements UserDetails {
 
 	public void setRole(String role) {
 		this.role = role;
+	}
+
+	public String getImgPath() {
+		return imgPath;
+	}
+
+	public void setImgPath(String imgPath) {
+		this.imgPath = imgPath;
 	}
 }
