@@ -18,18 +18,17 @@ import com.supportTicket.supportTicket.service.CommentsService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:5173/")
 public class CommentsController {
 	@Autowired
 	CommentsService commService;
-	
+
 	@PostMapping("/comment")
 	public ResponseEntity<Boolean> addComment(
 			@RequestPart("commentData") CommentRecord commRecord,
 			@RequestPart("files") List<MultipartFile> files,
 			@RequestPart("userName") String userName,
-			@RequestPart("placeName") String placeName){
-		commService.createComm(commRecord,files,userName,placeName);
-		return new ResponseEntity<>(true,HttpStatus.CREATED);
+			@RequestPart("placeName") String placeName) {
+		commService.createComm(commRecord, files, userName, placeName);
+		return new ResponseEntity<>(true, HttpStatus.CREATED);
 	}
 }
