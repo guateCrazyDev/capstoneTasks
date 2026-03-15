@@ -96,7 +96,7 @@ public class AuthController {
 
 	@PutMapping("/change-password")
 	public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRecord req) {
-
+		/* Test */
 		userService.changePassword(
 				req.username(),
 				req.oldPassword(),
