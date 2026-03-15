@@ -2,14 +2,11 @@ package com.supportTicket.supportTicket.service;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.exceptions.ImageNotFoundException;
-import com.supportTicket.supportTicket.model.Category;
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
 import com.supportTicket.supportTicket.repository.UserRepository;

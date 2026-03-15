@@ -8,13 +8,10 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.AuthenticationException;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.model.User;
-import com.supportTicket.supportTicket.records.CategoryRecord;
-import com.supportTicket.supportTicket.records.UserRecord;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
 import com.supportTicket.supportTicket.records.UserRequestRecord;
 import com.supportTicket.supportTicket.config.JwtService;
@@ -81,7 +78,7 @@ public class AuthController {
 
 	@PutMapping("/update")
 	public ResponseEntity<Boolean> updateUser(@RequestParam("originalUser") String originalUser,
-			@RequestParam("newUser") String newUser, @RequestParam(value="img", required=false) MultipartFile img) {
+			@RequestParam("newUser") String newUser, @RequestParam(value = "img", required = false) MultipartFile img) {
 		userService.updateUser(originalUser, newUser, img);
 		return new ResponseEntity<>(true, HttpStatus.CREATED);
 	}
