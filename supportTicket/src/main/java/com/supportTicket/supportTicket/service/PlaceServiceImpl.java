@@ -1,19 +1,14 @@
 package com.supportTicket.supportTicket.service;
 
-import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.nio.file.StandardCopyOption;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.supportTicket.supportTicket.comparators.PlaceNameComparator;
 import com.supportTicket.supportTicket.exceptions.ElementAlreadyExistsException;
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.model.*;
@@ -24,52 +19,13 @@ import com.supportTicket.supportTicket.repository.*;
 public class PlaceServiceImpl implements PlaceService {
 
 	@Autowired
-	private PicturesPlaceRepo picturesPlaceRepo;
-
-	@Autowired
 	private PlaceRepo placeRepo;
 
 	@Autowired
-	private CategoryRepo catRepo;
-
-	private final Path fileStorageLocation;
+	private CategoryRepo categoryRepo;
 
 	@Autowired
-	public PlaceServiceImpl(@Value("${file.upload-dir}") String uploadDir) {
-
-		this.fileStorageLocation = Paths.get(uploadDir)
-				.toAbsolutePath()
-				.normalize();
-
-		try {
-			Files.createDirectories(this.fileStorageLocation);
-		} catch (Exception ex) {
-			throw new RuntimeException("No se pudo crear el directorio de carga", ex);
-		}
-	}
-
-	private String storeFile(MultipartFile file) {
-
-		String originalName = StringUtils.cleanPath(file.getOriginalFilename());
-		String fileName = UUID.randomUUID() + "_" + originalName;
-
-		try {
-
-			Path targetLocation = this.fileStorageLocation.resolve(fileName);
-
-			Files.copy(
-					file.getInputStream(),
-					targetLocation,
-					StandardCopyOption.REPLACE_EXISTING);
-
-			return targetLocation.toString();
-
-		} catch (IOException ex) {
-
-			throw new RuntimeException("Error guardando archivo " + fileName);
-
-		}
-	}
+	private PicturesPlaceRepo picturesPlaceRepo;
 
 	@Override
 	public PlaceRecord createPlace(PlaceRecord place, List<MultipartFile> files, String catName) {
@@ -78,13 +34,14 @@ public class PlaceServiceImpl implements PlaceService {
 			throw new ElementAlreadyExistsException("This place already exists");
 		}
 
-		Category category = catRepo.findByCategoryName(catName);
+		Category category = categoryRepo.findByCategoryName(catName);
 
 		if (category == null) {
 			throw new ElementNotFoundException("Category not found");
 		}
 
 		Place newPlace = new Place();
+
 		newPlace.setName(place.name());
 		newPlace.setBestTime(place.bestTime());
 		newPlace.setLocation(place.location());
@@ -92,36 +49,77 @@ public class PlaceServiceImpl implements PlaceService {
 
 		newPlace = placeRepo.save(newPlace);
 
-		List<PicturesPlace> pics = new ArrayList<>();
+		try {
 
-		for (MultipartFile file : files) {
+			List<PicturesPlace> pics = new ArrayList<>();
 
-			PicturesPlace pic = new PicturesPlace();
+			if (files != null && !files.isEmpty()) {
 
-			pic.setPath(storeFile(file));
-			pic.setPlace(newPlace);
+				String uploadDir = System.getProperty("user.dir") + "/uploads/places/";
 
-			pic = picturesPlaceRepo.save(pic);
+				for (MultipartFile file : files) {
 
-			pics.add(pic);
+					String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+					Path path = Paths.get(uploadDir + fileName);
+
+					Files.createDirectories(path.getParent());
+					Files.write(path, file.getBytes());
+
+					PicturesPlace pic = new PicturesPlace();
+					pic.setPath(fileName);
+					pic.setPlace(newPlace);
+
+					picturesPlaceRepo.save(pic);
+					pics.add(pic);
+				}
+			}
+
+			newPlace.setPicturesPlace(pics);
+			placeRepo.save(newPlace);
+
+			List<PicturesPlaceRecord> picsRecord = new ArrayList<>();
+
+			for (PicturesPlace p : pics) {
+				picsRecord.add(new PicturesPlaceRecord(p.getPath()));
+			}
+
+			return new PlaceRecord(
+					newPlace.getName(),
+					newPlace.getBestTime(),
+					newPlace.getLocation(),
+					picsRecord,
+					category.getCategoryName(),
+					new ArrayList<>());
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error saving image");
+		}
+	}
+
+	@Override
+	public PlaceRecord updatePlace(PlaceRecord place, List<MultipartFile> files, String catName, String originalName) {
+
+		Place existing = placeRepo.findByName(originalName);
+
+		if (existing == null) {
+			throw new ElementNotFoundException("Place not found");
 		}
 
-		newPlace.setPicturesPlace(pics);
-		placeRepo.save(newPlace);
+		Category category = categoryRepo.findByCategoryName(catName);
 
-		List<PicturesPlaceRecord> picsRecord = new ArrayList<>();
-
-		for (PicturesPlace p : pics) {
-			picsRecord.add(new PicturesPlaceRecord(p.getPath()));
+		if (category == null) {
+			throw new ElementNotFoundException("Category not found");
 		}
 
-		return new PlaceRecord(
-				newPlace.getName(),
-				newPlace.getBestTime(),
-				newPlace.getLocation(),
-				picsRecord,
-				category.getCategoryName(),
-				place.comments());
+		existing.setName(place.name());
+		existing.setBestTime(place.bestTime());
+		existing.setLocation(place.location());
+		existing.setCategory(category);
+
+		placeRepo.save(existing);
+
+		return place;
 	}
 
 	@Override
@@ -137,56 +135,28 @@ public class PlaceServiceImpl implements PlaceService {
 
 		for (Place place : places) {
 
-			List<PicturesPlaceRecord> picsRecord = new ArrayList<>();
+			List<PicturesPlaceRecord> pics = new ArrayList<>();
 
-			for (PicturesPlace pic : place.getPicturesPlace()) {
-				picsRecord.add(new PicturesPlaceRecord(pic.getPath()));
+			for (PicturesPlace p : place.getPicturesPlace()) {
+				pics.add(new PicturesPlaceRecord(p.getPath()));
 			}
 
-			List<CommentRecord> commsRecord = new ArrayList<>();
-
-			for (Comments cms : place.getComms()) {
-
-				List<PictureCommentsRecord> picsCom = new ArrayList<>();
-
-				for (PicturesComments pc : cms.getPicturesComms()) {
-					picsCom.add(new PictureCommentsRecord(pc.getPath()));
-				}
-
-				UserRecord userR = new UserRecord(
-						cms.getUser().getUsername(),
-						cms.getUser().getRole());
-
-				CommentRecord comRec = new CommentRecord(
-						cms.getText(),
-						cms.getRate(),
-						cms.getDate(),
-						picsCom,
-						userR);
-
-				commsRecord.add(comRec);
-			}
-
-			PlaceRecord rec = new PlaceRecord(
+			result.add(new PlaceRecord(
 					place.getName(),
 					place.getBestTime(),
 					place.getLocation(),
-					picsRecord,
+					pics,
 					place.getCategory().getCategoryName(),
-					commsRecord);
-
-			result.add(rec);
+					new ArrayList<>()));
 		}
 
-		return result.stream()
-				.sorted(new PlaceNameComparator())
-				.toList();
+		return result;
 	}
 
 	@Override
 	public List<PlaceRecord> getAllByNameCat(String categoryName) {
 
-		Category category = catRepo.findByCategoryName(categoryName);
+		Category category = categoryRepo.findByCategoryName(categoryName);
 
 		if (category == null) {
 			throw new ElementNotFoundException("Category not found");
@@ -194,89 +164,26 @@ public class PlaceServiceImpl implements PlaceService {
 
 		List<Place> places = placeRepo.findByCategory_CategoryName(categoryName);
 
-		if (places.isEmpty()) {
-			throw new ElementNotFoundException("No places found");
-		}
-
 		List<PlaceRecord> result = new ArrayList<>();
 
 		for (Place place : places) {
 
-			List<PicturesPlaceRecord> picsRecord = new ArrayList<>();
+			List<PicturesPlaceRecord> pics = new ArrayList<>();
 
-			for (PicturesPlace pic : place.getPicturesPlace()) {
-				picsRecord.add(new PicturesPlaceRecord(pic.getPath()));
+			for (PicturesPlace p : place.getPicturesPlace()) {
+				pics.add(new PicturesPlaceRecord(p.getPath()));
 			}
 
-			PlaceRecord rec = new PlaceRecord(
+			result.add(new PlaceRecord(
 					place.getName(),
 					place.getBestTime(),
 					place.getLocation(),
-					picsRecord,
-					place.getCategory().getCategoryName(),
-					new ArrayList<>());
-
-			result.add(rec);
+					pics,
+					categoryName,
+					new ArrayList<>()));
 		}
 
-		return result.stream()
-				.sorted(new PlaceNameComparator())
-				.toList();
-	}
-
-	@Override
-	public PlaceRecord updatePlace(PlaceRecord place, List<MultipartFile> files, String catName, String originalName) {
-
-		Place existing = placeRepo.findByName(originalName);
-
-		if (existing == null) {
-			throw new ElementNotFoundException("Place not found");
-		}
-
-		Category category = catRepo.findByCategoryName(catName);
-
-		if (category == null) {
-			throw new ElementNotFoundException("Category not found");
-		}
-
-		existing.setName(place.name());
-		existing.setBestTime(place.bestTime());
-		existing.setLocation(place.location());
-		existing.setCategory(category);
-
-		existing = placeRepo.save(existing);
-
-		List<PicturesPlace> pics = new ArrayList<>();
-
-		for (MultipartFile file : files) {
-
-			PicturesPlace pic = new PicturesPlace();
-
-			pic.setPath(storeFile(file));
-			pic.setPlace(existing);
-
-			pic = picturesPlaceRepo.save(pic);
-
-			pics.add(pic);
-		}
-
-		existing.setPicturesPlace(pics);
-
-		placeRepo.save(existing);
-
-		List<PicturesPlaceRecord> picsRecord = new ArrayList<>();
-
-		for (PicturesPlace p : pics) {
-			picsRecord.add(new PicturesPlaceRecord(p.getPath()));
-		}
-
-		return new PlaceRecord(
-				existing.getName(),
-				existing.getBestTime(),
-				existing.getLocation(),
-				picsRecord,
-				category.getCategoryName(),
-				place.comments());
+		return result;
 	}
 
 	@Override

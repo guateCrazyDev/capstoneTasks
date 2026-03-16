@@ -19,7 +19,7 @@ import tools.jackson.databind.ObjectMapper;
 public class CategoryController {
 
 	@Autowired
-	CategoryService catService;
+	private CategoryService categoryService;
 
 	@PostMapping("/category")
 	public ResponseEntity<CategoryRecord> createCat(
@@ -30,7 +30,7 @@ public class CategoryController {
 
 		CategoryRecord cateRe = objectMapper.readValue(categoryDataJson, CategoryRecord.class);
 
-		CategoryRecord response = catService.createCategory(cateRe, img);
+		CategoryRecord response = categoryService.createCategory(cateRe, img);
 
 		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
@@ -38,7 +38,7 @@ public class CategoryController {
 	@GetMapping("/category")
 	public ResponseEntity<List<CategoryRecord>> getAllCategories() {
 
-		List<CategoryRecord> response = catService.getAlls();
+		List<CategoryRecord> response = categoryService.getAlls();
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

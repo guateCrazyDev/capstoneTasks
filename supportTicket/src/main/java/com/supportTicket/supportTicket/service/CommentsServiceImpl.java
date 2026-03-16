@@ -1,13 +1,12 @@
 package com.supportTicket.supportTicket.service;
 
-import java.io.IOException;
-import java.nio.file.*;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.comparators.CommentDateComparator;
@@ -21,51 +20,13 @@ import com.supportTicket.supportTicket.repository.*;
 public class CommentsServiceImpl implements CommentsService {
 
 	@Autowired
-	private CommentsRepo commsRepo;
+	private CommentsRepo commentsRepo;
 
 	@Autowired
 	private PlaceRepo placeRepo;
 
 	@Autowired
 	private UserRepository userRepository;
-
-	private final Path fileStorageLocation;
-
-	@Autowired
-	public CommentsServiceImpl(@Value("${file.upload-dir}") String uploadDir) {
-
-		this.fileStorageLocation = Paths.get(uploadDir)
-				.toAbsolutePath()
-				.normalize();
-
-		try {
-			Files.createDirectories(this.fileStorageLocation);
-		} catch (Exception ex) {
-			throw new RuntimeException("No se pudo crear el directorio de carga", ex);
-		}
-	}
-
-	private String storeFile(MultipartFile file) {
-
-		String fileName = UUID.randomUUID() + "_" + StringUtils.cleanPath(file.getOriginalFilename());
-
-		try {
-
-			Path targetLocation = this.fileStorageLocation.resolve(fileName);
-
-			Files.copy(
-					file.getInputStream(),
-					targetLocation,
-					StandardCopyOption.REPLACE_EXISTING);
-
-			return targetLocation.toString();
-
-		} catch (IOException ex) {
-
-			throw new RuntimeException("Error guardando archivo " + fileName);
-
-		}
-	}
 
 	@Override
 	public CommentRecord createComm(CommentRecord commR, List<MultipartFile> files, String userName, String placeName) {
@@ -94,22 +55,37 @@ public class CommentsServiceImpl implements CommentsService {
 
 		List<PicturesComments> pictures = new ArrayList<>();
 
-		if (files != null && !files.isEmpty()) {
+		try {
 
-			for (MultipartFile file : files) {
+			if (files != null && !files.isEmpty()) {
 
-				PicturesComments picture = new PicturesComments();
+				String uploadDir = System.getProperty("user.dir") + "/uploads/comments/";
 
-				picture.setPath(storeFile(file));
-				picture.setComment(comment);
+				for (MultipartFile file : files) {
 
-				pictures.add(picture);
+					String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+					Path path = Paths.get(uploadDir + fileName);
+
+					Files.createDirectories(path.getParent());
+					Files.write(path, file.getBytes());
+
+					PicturesComments picture = new PicturesComments();
+
+					picture.setPath(fileName);
+					picture.setComment(comment);
+
+					pictures.add(picture);
+				}
 			}
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error saving image");
 		}
 
 		comment.setPicturesComms(pictures);
 
-		comment = commsRepo.save(comment);
+		comment = commentsRepo.save(comment);
 
 		if (place.getComms() == null) {
 			place.setComms(new ArrayList<>());

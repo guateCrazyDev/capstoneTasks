@@ -6,9 +6,11 @@ import java.nio.file.Paths;
 import java.util.Optional;
 import java.util.UUID;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
@@ -17,13 +19,11 @@ import com.supportTicket.supportTicket.repository.UserRepository;
 @Service
 public class UserServiceImpl implements UserService {
 
-	private final UserRepository userRepository;
-	private final PasswordEncoder passwordEncoder;
+	@Autowired
+	private UserRepository userRepository;
 
-	public UserServiceImpl(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-		this.userRepository = userRepository;
-		this.passwordEncoder = passwordEncoder;
-	}
+	@Autowired
+	private PasswordEncoder passwordEncoder;
 
 	@Override
 	public Optional<User> findByUsername(String username) {

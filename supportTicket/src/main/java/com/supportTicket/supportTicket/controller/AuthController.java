@@ -2,6 +2,7 @@ package com.supportTicket.supportTicket.controller;
 
 import java.util.Optional;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -22,18 +23,14 @@ import com.supportTicket.supportTicket.wrappers.JwtResponse;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	private final AuthenticationManager authenticationManager;
-	private final JwtService jwtService;
-	private final UserService userService;
+	@Autowired
+	private AuthenticationManager authenticationManager;
 
-	public AuthController(AuthenticationManager authenticationManager,
-			JwtService jwtService,
-			UserService userService) {
+	@Autowired
+	private JwtService jwtService;
 
-		this.authenticationManager = authenticationManager;
-		this.jwtService = jwtService;
-		this.userService = userService;
-	}
+	@Autowired
+	private UserService userService;
 
 	@PostMapping("/login")
 	public ResponseEntity<Object> login(@RequestBody UserRequestRecord user) {
@@ -96,7 +93,7 @@ public class AuthController {
 
 	@PutMapping("/change-password")
 	public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRecord req) {
-		/* Test */
+
 		userService.changePassword(
 				req.username(),
 				req.oldPassword(),

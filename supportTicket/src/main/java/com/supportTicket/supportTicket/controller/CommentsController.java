@@ -1,13 +1,11 @@
 package com.supportTicket.supportTicket.controller;
 
 import java.util.List;
-
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.multipart.MultipartFile;
-
 import com.supportTicket.supportTicket.records.CommentRecord;
 import com.supportTicket.supportTicket.service.CommentsService;
 
@@ -15,11 +13,8 @@ import com.supportTicket.supportTicket.service.CommentsService;
 @RequestMapping("/api/comments")
 public class CommentsController {
 
-	private final CommentsService commService;
-
-	public CommentsController(CommentsService commService) {
-		this.commService = commService;
-	}
+	@Autowired
+	private CommentsService commentsService;
 
 	@PostMapping(consumes = { "multipart/form-data" })
 	public ResponseEntity<CommentRecord> addComment(
@@ -28,7 +23,7 @@ public class CommentsController {
 			@RequestPart("userName") String userName,
 			@RequestPart("placeName") String placeName) {
 
-		CommentRecord response = commService.createComm(commRecord, files, userName, placeName);
+		CommentRecord response = commentsService.createComm(commRecord, files, userName, placeName);
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
