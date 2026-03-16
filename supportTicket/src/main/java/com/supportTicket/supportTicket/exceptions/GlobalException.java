@@ -16,7 +16,7 @@ public class GlobalException {
 	@ExceptionHandler(ElementNotFoundException.class)
 	public ResponseEntity<String> elementNotFoundException(
 			ElementNotFoundException exc){
-		return new ResponseEntity<>(exc.getMessage(),HttpStatus.NOT_FOUND);
+		return new ResponseEntity<>(exc.getMessage(),HttpStatus.NO_CONTENT);
 	}
 	
 	@ExceptionHandler(ImageNotFoundException.class)

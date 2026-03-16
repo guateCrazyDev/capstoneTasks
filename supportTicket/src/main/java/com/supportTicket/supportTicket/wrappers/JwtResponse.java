@@ -4,7 +4,7 @@ public class JwtResponse {
 	private String jwt;
 	private String role;
 	private String username;
-	private byte[] img;
+	private String img;
 	
 	public String getJwt() {
 		return jwt;
@@ -24,10 +24,10 @@ public class JwtResponse {
 	public void setUsername(String username) {
 		this.username = username;
 	}
-	public byte[] getImg() {
+	public String getImg() {
 		return img;
 	}
-	public void setImg(byte[] img) {
+	public void setImg(String img) {
 		this.img = img;
 	}
 }

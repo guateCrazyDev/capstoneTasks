@@ -43,13 +43,13 @@ public class AuthController {
 			var authenticationToken = new UsernamePasswordAuthenticationToken(user.username(), user.password());
 			var authentication = authenticationManager.authenticate(authenticationToken);
 			var jwt = jwtService.generateToken(authentication.getName());
-			JwtResponse response = new JwtResponse();
 			Optional<User> useResOp = userService.findByUsername(user.username());
 			User useRes = useResOp.get();
+			JwtResponse response = new JwtResponse();
 			response.setJwt(jwt);
 			response.setRole(useRes.getRole());
 			response.setUsername(useRes.getUsername());
-			response.setImg(useRes.getImg());
+			response.setImg(useRes.getPath());
 			return new ResponseEntity<>(response, HttpStatus.OK);
 		} catch (AuthenticationException e) {
 			return new ResponseEntity<>("Invalid credentials", HttpStatus.NOT_FOUND);
@@ -80,10 +80,18 @@ public class AuthController {
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<Boolean> updateUser(@RequestParam("originalUser") String originalUser,
+	public ResponseEntity<Object> updateUser(@RequestParam("originalUser") String originalUser,
 			@RequestParam("newUser") String newUser, @RequestParam(value="img", required=false) MultipartFile img) {
 		userService.updateUser(originalUser, newUser, img);
-		return new ResponseEntity<>(true, HttpStatus.CREATED);
+		var jwt = jwtService.generateToken(newUser);
+		Optional<User> useResOp = userService.findByUsername(newUser);
+		User useRes = useResOp.get();
+		JwtResponse response = new JwtResponse();
+		response.setRole(useRes.getRole());
+		response.setUsername(useRes.getUsername());
+		response.setImg(useRes.getPath());
+		response.setJwt(jwt);
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@GetMapping("/user/{userName}")

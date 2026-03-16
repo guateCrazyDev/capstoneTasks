@@ -23,23 +23,30 @@ public class User implements UserDetails {
 	private String password;
 	private String role;
 
-	@Lob
-	private byte[] img;
+	private String path;
 
-	public byte[] getImg() {
-		return img;
+	
+
+	public String getPath() {
+		return path;
 	}
 
-	public void setImg(byte[] img) {
-		this.img = img;
+
+	public void setPath(String path) {
+		this.path = path;
 	}
+
 
 	public User() {
 	}
 
-	public User(Long id, String username) {
+	public User(Long id, String username, String password, String role, String path) {
+		super();
 		this.id = id;
 		this.username = username;
+		this.password = password;
+		this.role = role;
+		this.path = path;
 	}
 
 	@Override

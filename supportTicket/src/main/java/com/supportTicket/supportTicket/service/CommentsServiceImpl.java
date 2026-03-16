@@ -72,6 +72,8 @@ public class CommentsServiceImpl implements CommentsService {
 			comment.setDate(commR.date());
 			comment.setRate(commR.rate());
 			comment.setUser(user);
+			comment.setUserNameComent(user.getUsername());
+			comment.setUserImgPath(user.getPath());
 			comment.setPlace(place);
 			comment = commsRepo.save(comment);
 			List<PicturesComments> pics = new ArrayList();

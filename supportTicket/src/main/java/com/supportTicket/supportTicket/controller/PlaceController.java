@@ -25,7 +25,6 @@ import com.supportTicket.supportTicket.service.PlaceService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:5173/")
 public class PlaceController {
 	@Autowired
 	PlaceService placeService;

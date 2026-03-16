@@ -20,6 +20,8 @@ public class Comments {
 	private String text;
 	private Integer rate;
 	private Date date;
+	private String userNameComent;
+	private String userImgPath;
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("comment-pictures")
 	private List<PicturesComments> picturesComms;
@@ -38,18 +40,20 @@ public class Comments {
 		super();
 	}
 	
-	public Comments(Long id, String text, Integer rate, Date date, List<PicturesComments> picturesComms, User user,
-			Place place) {
+	public Comments(Long id, String text, Integer rate, Date date, String userNameComent, String userImgPath,
+			List<PicturesComments> picturesComms, User user, Place place) {
 		super();
 		this.id = id;
 		this.text = text;
 		this.rate = rate;
 		this.date = date;
+		this.userNameComent = userNameComent;
+		this.userImgPath = userImgPath;
 		this.picturesComms = picturesComms;
 		this.user = user;
 		this.place = place;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -91,5 +95,17 @@ public class Comments {
 	}
 	public void setPlace(Place place) {
 		this.place = place;
+	}
+	public String getUserNameComent() {
+		return userNameComent;
+	}
+	public void setUserNameComent(String userNameComent) {
+		this.userNameComent = userNameComent;
+	}
+	public String getUserImgPath() {
+		return userImgPath;
+	}
+	public void setUserImgPath(String userImgPath) {
+		this.userImgPath = userImgPath;
 	}
 }

@@ -18,7 +18,6 @@ import com.supportTicket.supportTicket.service.CommentsService;
 
 @RestController
 @RequestMapping("/api")
-@CrossOrigin("http://localhost:5173/")
 public class CommentsController {
 	@Autowired
 	CommentsService commService;

@@ -19,6 +19,7 @@ public class Place {
 	private String name;
 	private String bestTime;
 	private String Location;
+	private String description;
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("place-pictures")
 	private List<PicturesPlace> picturesPlace;
@@ -36,18 +37,19 @@ public class Place {
 		super();
 	}
 	
-	public Place(Long id, String name, String bestTime, String location, List<PicturesPlace> picturesPlace,
-			Category category, List<Comments> comms) {
+	public Place(Long id, String name, String bestTime, String location, String description,
+			List<PicturesPlace> picturesPlace, Category category, List<Comments> comms) {
 		super();
 		this.id = id;
 		this.name = name;
 		this.bestTime = bestTime;
 		Location = location;
+		this.description = description;
 		this.picturesPlace = picturesPlace;
 		this.category = category;
 		this.comms = comms;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
@@ -89,5 +91,11 @@ public class Place {
 	}
 	public void setComms(List<Comments> comms) {
 		this.comms = comms;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
 	}
 }

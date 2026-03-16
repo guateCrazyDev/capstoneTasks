@@ -80,6 +80,7 @@ public class PlaceServiceImpl implements PlaceService{
 				places.setBestTime(place.bestTime());
 				places.setLocation(place.location());
 				places.setName(place.name());
+				places.setDescription(place.description());
 				places.setCategory(category);
 				places = placeRepo.save(places);
 				List<PicturesPlace> pics = new ArrayList();
@@ -102,7 +103,7 @@ public class PlaceServiceImpl implements PlaceService{
 					picsRecord.add(picRec);
 				}
 				PlaceRecord recRet = new PlaceRecord(
-				place.name(),place.bestTime(),place.location(),picsRecord,category.getCategoryName(),place.comments());
+				place.name(),place.bestTime(),place.location(),place.description(),picsRecord,category.getCategoryName(),place.comments());
 				return recRet;
 			}else {
 				throw new ElementNotFoundException("This Category doenst exists");
@@ -129,16 +130,17 @@ public class PlaceServiceImpl implements PlaceService{
 						PictureCommentsRecord picComRec = new PictureCommentsRecord(picsCom.getPath());
 						commsRecordPic.add(picComRec);
 					}
-					UserRecord userR = new UserRecord(cms.getUser().getUsername()
-							,cms.getUser().getRole());
 					CommentRecord comRec = new CommentRecord(
-							cms.getText(),cms.getRate(),cms.getDate(),commsRecordPic,userR);
+							cms.getText(),cms.getRate(),cms.getDate(),
+							commsRecordPic,cms.getUser().getUsername(),
+							cms.getUser().getPath());
 					commsRecord.add(comRec);
 				}
 				PlaceRecord rec = new PlaceRecord(
 						place.getName()
 						,place.getBestTime()
 						,place.getLocation()
+						,place.getDescription()
 						,picsRecord
 						,place.getCategory().getCategoryName()
 						,commsRecord);
@@ -169,16 +171,17 @@ public class PlaceServiceImpl implements PlaceService{
 							PictureCommentsRecord picComRec = new PictureCommentsRecord(picsCom.getPath());
 							commsRecordPic.add(picComRec);
 						}
-						UserRecord userR = new UserRecord(cms.getUser().getUsername()
-								,cms.getUser().getRole());
 						CommentRecord comRec = new CommentRecord(
-								cms.getText(),cms.getRate(),cms.getDate(),commsRecordPic,userR);
+								cms.getText(),cms.getRate(),cms.getDate()
+								,commsRecordPic,cms.getUser().getUsername(),
+								cms.getUser().getPath());
 						commsRecord.add(comRec);
 					}
 					PlaceRecord rec = new PlaceRecord(
 							place.getName()
 							,place.getBestTime()
 							,place.getLocation()
+							,place.getDescription()
 							,picsRecord
 							,place.getCategory().getCategoryName()
 							,commsRecord);
@@ -224,7 +227,7 @@ public class PlaceServiceImpl implements PlaceService{
 						picsRecord.add(picRec);
 					}
 					PlaceRecord recRet = new PlaceRecord(
-					place.name(),place.bestTime(),place.location(),picsRecord,category.getCategoryName(),place.comments());
+					place.name(),place.bestTime(),place.location(),place.description(),picsRecord,category.getCategoryName(),place.comments());
 					return recRet;
 				}else {
 					throw new ElementNotFoundException("This Category doenst exists");
@@ -261,7 +264,7 @@ public class PlaceServiceImpl implements PlaceService{
 							place.getName()
 							,place.getBestTime()
 							,place.getLocation()
-							,picsRecord);
+							,picsRecord); 
 					placesR.add(rec);
 				}
 				placesR = placesR.stream().sorted(new PlaceLigthNameComparator()).toList();
@@ -291,10 +294,10 @@ public class PlaceServiceImpl implements PlaceService{
 					PictureCommentsRecord picComRec = new PictureCommentsRecord(picsCom.getPath());
 					commsRecordPic.add(picComRec);
 				}
-				UserRecord userR = new UserRecord(cms.getUser().getUsername()
-						,cms.getUser().getRole());
 				CommentRecord comRec = new CommentRecord(
-						cms.getText(),cms.getRate(),cms.getDate(),commsRecordPic,userR);
+						cms.getText(),cms.getRate(),cms.getDate()
+						,commsRecordPic,cms.getUser().getUsername(),
+						cms.getUser().getPath());
 				commsRecord.add(comRec);
 				rateAv += cms.getRate();
 			}
@@ -303,6 +306,7 @@ public class PlaceServiceImpl implements PlaceService{
 					place.getName()
 					,place.getBestTime()
 					,place.getLocation()
+					,place.getDescription()
 					,picsRecord
 					,place.getCategory().getCategoryName()
 					,commsRecord
