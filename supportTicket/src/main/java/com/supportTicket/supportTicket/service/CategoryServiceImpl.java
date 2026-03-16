@@ -1,5 +1,8 @@
 package com.supportTicket.supportTicket.service;
 
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -16,37 +19,73 @@ import com.supportTicket.supportTicket.records.CategoryRecord;
 import com.supportTicket.supportTicket.repository.CategoryRepo;
 
 @Service
-public class CategoryServiceImpl implements CategoryService{
+public class CategoryServiceImpl implements CategoryService {
+
 	@Autowired
 	CategoryRepo categoryRepo;
-	
-	public CategoryRecord createCategory(CategoryRecord catRec,MultipartFile img) {
-		if(categoryRepo.findByCategoryName(catRec.categoryName()) == null) {
+
+	public CategoryRecord createCategory(CategoryRecord catRec, MultipartFile img) {
+
+		if (categoryRepo.findByCategoryName(catRec.categoryName()) == null) {
+
 			try {
+
+				String uploadDir = System.getProperty("user.dir") + "/uploads/categories/";
+
+				String fileName = System.currentTimeMillis() + "_" + img.getOriginalFilename();
+
+				Path path = Paths.get(uploadDir + fileName);
+
+				Files.createDirectories(path.getParent());
+
+				Files.write(path, img.getBytes());
+
 				Category category = new Category();
+
 				category.setCategoryName(catRec.categoryName());
 				category.setDescription(catRec.description());
-				category.setImg(img.getBytes());
+				category.setImagePath(uploadDir + fileName);
+
 				categoryRepo.save(category);
-				return catRec;
-			}catch(Exception e) {
+
+				return new CategoryRecord(
+						category.getCategoryName(),
+						category.getDescription(),
+						category.getImagePath());
+
+			} catch (Exception e) {
+
 				throw new ImageNotFoundException("It was not possible to process the image");
 			}
-		}else {
+
+		} else {
+
 			throw new ElementAlreadyExistsException("This category already exists");
 		}
 	}
-	
-	public List<CategoryRecord> getAlls(){
+
+	public List<CategoryRecord> getAlls() {
+
 		List<Category> categories = categoryRepo.findAll();
-		if(categories.size() > 0) {
-			List<CategoryRecord> catsRec = new ArrayList();
-			for(Category cat : categories) {
-				CategoryRecord catR = new CategoryRecord(cat.getCategoryName(),cat.getDescription(),cat.getImg());
+
+		if (categories.size() > 0) {
+
+			List<CategoryRecord> catsRec = new ArrayList<>();
+
+			for (Category cat : categories) {
+
+				CategoryRecord catR = new CategoryRecord(
+						cat.getCategoryName(),
+						cat.getDescription(),
+						cat.getImagePath());
+
 				catsRec.add(catR);
 			}
+
 			return catsRec.stream().sorted(new CategoryNameComparator()).toList();
-		}else {
+
+		} else {
+
 			throw new ElementNotFoundException("There is no Categories");
 		}
 	}

@@ -7,6 +7,8 @@ import org.springframework.web.multipart.MultipartFile;
 import com.supportTicket.supportTicket.records.CategoryRecord;
 
 public interface CategoryService {
-	CategoryRecord createCategory(CategoryRecord catRec,MultipartFile img);
+
+	CategoryRecord createCategory(CategoryRecord catRec, MultipartFile img);
+
 	List<CategoryRecord> getAlls();
 }
