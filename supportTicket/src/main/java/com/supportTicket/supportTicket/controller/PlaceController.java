@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.records.PlaceLigthRecord;
 import com.supportTicket.supportTicket.records.PlaceRecord;
+import com.supportTicket.supportTicket.records.PlaceUniqueRecord;
 import com.supportTicket.supportTicket.service.PlaceService;
 
 @RestController
@@ -57,9 +58,9 @@ public class PlaceController {
 		return new ResponseEntity<>(places,HttpStatus.OK);
 	}
 	
-	@GetMapping("/place/{placeName}")
-	public ResponseEntity<PlaceRecord> getPlacebyName(@PathVariable String placeName){
-		PlaceRecord response = placeService.getPlaceByName(placeName); 
+	@GetMapping("/place/onlyOne/{placeName}")
+	public ResponseEntity<PlaceUniqueRecord> getPlacebyName(@PathVariable String placeName){
+		PlaceUniqueRecord response = placeService.getPlaceByName(placeName); 
 		return new ResponseEntity<>(response,HttpStatus.OK);
 	}
 	

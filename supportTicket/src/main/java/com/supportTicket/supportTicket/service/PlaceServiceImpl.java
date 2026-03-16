@@ -28,6 +28,7 @@ import com.supportTicket.supportTicket.records.PictureCommentsRecord;
 import com.supportTicket.supportTicket.records.PicturesPlaceRecord;
 import com.supportTicket.supportTicket.records.PlaceLigthRecord;
 import com.supportTicket.supportTicket.records.PlaceRecord;
+import com.supportTicket.supportTicket.records.PlaceUniqueRecord;
 import com.supportTicket.supportTicket.records.UserRecord;
 import com.supportTicket.supportTicket.repository.CategoryRepo;
 import com.supportTicket.supportTicket.repository.CommentsRepo;
@@ -273,8 +274,9 @@ public class PlaceServiceImpl implements PlaceService{
 		}
 	}
 	
-	public PlaceRecord getPlaceByName(String placeName) {
+	public PlaceUniqueRecord getPlaceByName(String placeName) {
 		if(placeRepo.findByName(placeName) != null) {
+			Double rateAv = Double.parseDouble("0");
 			Place place = placeRepo.findByName(placeName);
 
 			List<PicturesPlaceRecord> picsRecord = new ArrayList();
@@ -294,14 +296,17 @@ public class PlaceServiceImpl implements PlaceService{
 				CommentRecord comRec = new CommentRecord(
 						cms.getText(),cms.getRate(),cms.getDate(),commsRecordPic,userR);
 				commsRecord.add(comRec);
+				rateAv += cms.getRate();
 			}
-			PlaceRecord rec = new PlaceRecord(
+			rateAv /= commsRecord.size();
+			PlaceUniqueRecord rec = new PlaceUniqueRecord(
 					place.getName()
 					,place.getBestTime()
 					,place.getLocation()
 					,picsRecord
 					,place.getCategory().getCategoryName()
-					,commsRecord);
+					,commsRecord
+					,rateAv);
 			return rec;
 		}else {
 			throw new ElementNotFoundException("The place to update doesnt exists");
