@@ -13,6 +13,9 @@ import org.springframework.web.multipart.MultipartFile;
 import com.supportTicket.supportTicket.records.CategoryRecord;
 import com.supportTicket.supportTicket.service.CategoryService;
 import tools.jackson.databind.ObjectMapper;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 
 @RestController
 @RequestMapping("/api")
@@ -39,6 +42,29 @@ public class CategoryController {
 	public ResponseEntity<List<CategoryRecord>> getAllCategories() {
 
 		List<CategoryRecord> response = categoryService.getAlls();
+
+		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@DeleteMapping("/category/{name}")
+	public ResponseEntity<Void> deleteCategory(@PathVariable String name) {
+
+		categoryService.deleteCategory(name);
+
+		return ResponseEntity.noContent().build();
+	}
+
+	@PutMapping("/category/{name}")
+	public ResponseEntity<CategoryRecord> updateCategory(
+			@PathVariable String name,
+			@RequestParam("categoryData") String categoryDataJson,
+			@RequestParam(value = "img", required = false) MultipartFile img) throws Exception {
+
+		ObjectMapper objectMapper = new ObjectMapper();
+
+		CategoryRecord catRec = objectMapper.readValue(categoryDataJson, CategoryRecord.class);
+
+		CategoryRecord response = categoryService.updateCategory(name, catRec, img);
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
 	}

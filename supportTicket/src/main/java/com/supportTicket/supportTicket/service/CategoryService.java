@@ -11,4 +11,9 @@ public interface CategoryService {
 	CategoryRecord createCategory(CategoryRecord catRec, MultipartFile img);
 
 	List<CategoryRecord> getAlls();
+
+	public void deleteCategory(String name);
+
+	CategoryRecord updateCategory(String name, CategoryRecord catRec, MultipartFile img);
+
 }
