@@ -1,10 +1,13 @@
 package com.supportTicket.supportTicket.service;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -13,7 +16,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.supportTicket.supportTicket.comparators.CategoryNameComparator;
 import com.supportTicket.supportTicket.exceptions.ElementAlreadyExistsException;
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
-import com.supportTicket.supportTicket.exceptions.ImageNotFoundException;
+import com.supportTicket.supportTicket.exceptions.ImageStorageException;
 import com.supportTicket.supportTicket.model.Category;
 import com.supportTicket.supportTicket.records.CategoryRecord;
 import com.supportTicket.supportTicket.repository.CategoryRepo;
@@ -22,71 +25,82 @@ import com.supportTicket.supportTicket.repository.CategoryRepo;
 public class CategoryServiceImpl implements CategoryService {
 
 	@Autowired
-	CategoryRepo categoryRepo;
+	private CategoryRepo categoryRepo;
 
-	public CategoryRecord createCategory(CategoryRecord catRec, MultipartFile img) {
+	private final String uploadDir = System.getProperty("user.dir") + "/uploads/categories/";
 
-		if (categoryRepo.findByCategoryName(catRec.categoryName()) == null) {
+	private String storeImage(MultipartFile img) {
 
-			try {
+		if (img == null || img.isEmpty()) {
+			throw new ImageStorageException("Image file is empty");
+		}
 
-				String uploadDir = System.getProperty("user.dir") + "/uploads/categories/";
+		String fileName = UUID.randomUUID() + "_" + img.getOriginalFilename();
 
-				String fileName = System.currentTimeMillis() + "_" + img.getOriginalFilename();
+		try {
 
-				Path path = Paths.get(uploadDir + fileName);
+			Path path = Paths.get(uploadDir + fileName);
 
-				Files.createDirectories(path.getParent());
+			Files.createDirectories(path.getParent());
 
-				Files.write(path, img.getBytes());
+			Files.write(path, img.getBytes());
 
-				Category category = new Category();
+			return uploadDir + fileName;
 
-				category.setCategoryName(catRec.categoryName());
-				category.setDescription(catRec.description());
-				category.setImagePath(uploadDir + fileName);
+		} catch (IOException e) {
 
-				categoryRepo.save(category);
-
-				return new CategoryRecord(
-						category.getCategoryName(),
-						category.getDescription(),
-						category.getImagePath());
-
-			} catch (Exception e) {
-
-				throw new ImageNotFoundException("It was not possible to process the image");
-			}
-
-		} else {
-
-			throw new ElementAlreadyExistsException("This category already exists");
+			throw new ImageStorageException("Failed to store image: " + fileName);
 		}
 	}
 
+	@Override
+	public CategoryRecord createCategory(CategoryRecord catRec, MultipartFile img) {
+
+		Category existing = categoryRepo.findByCategoryName(catRec.categoryName());
+
+		if (existing != null) {
+			throw new ElementAlreadyExistsException("Category already exists: " + catRec.categoryName());
+		}
+
+		String imagePath = storeImage(img);
+
+		Category category = new Category();
+
+		category.setCategoryName(catRec.categoryName());
+		category.setDescription(catRec.description());
+		category.setImagePath(imagePath);
+
+		categoryRepo.save(category);
+
+		return new CategoryRecord(
+				category.getCategoryName(),
+				category.getDescription(),
+				category.getImagePath());
+	}
+
+	@Override
 	public List<CategoryRecord> getAlls() {
 
 		List<Category> categories = categoryRepo.findAll();
 
-		if (categories.size() > 0) {
-
-			List<CategoryRecord> catsRec = new ArrayList<>();
-
-			for (Category cat : categories) {
-
-				CategoryRecord catR = new CategoryRecord(
-						cat.getCategoryName(),
-						cat.getDescription(),
-						cat.getImagePath());
-
-				catsRec.add(catR);
-			}
-
-			return catsRec.stream().sorted(new CategoryNameComparator()).toList();
-
-		} else {
-
-			throw new ElementNotFoundException("There is no Categories");
+		if (categories.isEmpty()) {
+			throw new ElementNotFoundException("No categories found");
 		}
+
+		List<CategoryRecord> records = new ArrayList<>();
+
+		for (Category cat : categories) {
+
+			CategoryRecord record = new CategoryRecord(
+					cat.getCategoryName(),
+					cat.getDescription(),
+					cat.getImagePath());
+
+			records.add(record);
+		}
+
+		return records.stream()
+				.sorted(new CategoryNameComparator())
+				.toList();
 	}
 }
