@@ -14,6 +14,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.CategoryRecord;
+import com.supportTicket.supportTicket.records.ChangePasswordRecord;
 import com.supportTicket.supportTicket.records.UserRecord;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
 import com.supportTicket.supportTicket.records.UserRequestRecord;
@@ -98,5 +99,16 @@ public class AuthController {
 	public ResponseEntity<UserRecordResponse> getUserInfo(@PathVariable String userName) {
 		UserRecordResponse response = userService.getUserInfo(userName);
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+	
+	@PutMapping("/change-password")
+	public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRecord req) {
+
+		userService.changePassword(
+				req.username(),
+				req.oldPassword(),
+				req.newPassword());
+
+		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 }

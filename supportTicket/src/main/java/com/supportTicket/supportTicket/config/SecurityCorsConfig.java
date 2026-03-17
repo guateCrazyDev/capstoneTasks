@@ -14,7 +14,7 @@ public class SecurityCorsConfig {
         CorsConfiguration config = new CorsConfiguration();
 
         // Usa orígenes explícitos (no "*") cuando allowCredentials = true
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // Vite
+        config.setAllowedOrigins(List.of("http://localhost:5173","http://localhost:5174")); // Vite
         // Si usas Spring Framework 6 / Boot 3 y tienes problemas con setAllowedOrigins
         // puedes usar:
         // config.setAllowedOriginPatterns(List.of("http://localhost:5173"));

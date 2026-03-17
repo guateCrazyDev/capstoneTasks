@@ -42,6 +42,27 @@ public class UserServiceImpl implements UserService {
         }
 	}
 	
+	@Override
+	public boolean changePassword(String username, String oldPassword, String newPassword) {
+
+		Optional<User> userOp = userRepository.findByUsername(username);
+
+		if (userOp.isEmpty()) {
+			throw new ElementNotFoundException("User not found");
+		}
+
+		User user = userOp.get();
+
+		if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+			throw new RuntimeException("Old password incorrect");
+		}
+
+		user.setPassword(passwordEncoder.encode(newPassword));
+
+		userRepository.save(user);
+
+		return true;
+	}
 
     private String storeFile(MultipartFile file) {
         String fileName = StringUtils.cleanPath(file.getOriginalFilename());

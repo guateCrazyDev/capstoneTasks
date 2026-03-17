@@ -12,4 +12,5 @@ public interface UserService {
     User saveUser(User user);
 	boolean updateUser(String userOg,String newUser,MultipartFile img); 
 	UserRecordResponse getUserInfo(String userName);
+	boolean changePassword(String username, String oldPassword, String newPassword);
 }
