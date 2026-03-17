@@ -1,5 +1,6 @@
 package com.supportTicket.supportTicket.model;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.*;
@@ -27,6 +28,10 @@ public class Place {
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("place-comments")
 	private List<Comments> comms;
+
+	@ManyToMany(mappedBy = "favoritePlaces")
+	@com.fasterxml.jackson.annotation.JsonIgnore
+	private List<User> usersWhoFavorited = new ArrayList<>();
 
 	public Place() {
 	}
@@ -97,4 +102,13 @@ public class Place {
 	public void setComms(List<Comments> comms) {
 		this.comms = comms;
 	}
+
+	public List<User> getUsersWhoFavorited() {
+		return usersWhoFavorited;
+	}
+
+	public void setUsersWhoFavorited(List<User> usersWhoFavorited) {
+		this.usersWhoFavorited = usersWhoFavorited;
+	}
+	
 }

@@ -1,5 +1,6 @@
 package com.supportTicket.supportTicket.model;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 
@@ -10,6 +11,9 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 
 @Entity
 public class User implements UserDetails {
@@ -22,6 +26,13 @@ public class User implements UserDetails {
 	private String password;
 	private String role;
 	private String imgPath;
+
+	@ManyToMany
+	@JoinTable(
+    name = "user_favorites",
+    joinColumns = @JoinColumn(name = "user_id"),
+    inverseJoinColumns = @JoinColumn(name = "place_id"))
+	private List<Place> favoritePlaces = new ArrayList<>();
 
 	public User() {
 	}
@@ -97,4 +108,14 @@ public class User implements UserDetails {
 	public void setImgPath(String imgPath) {
 		this.imgPath = imgPath;
 	}
+
+	public List<Place> getFavoritePlaces() {
+		return favoritePlaces;
+	}
+
+	public void setFavoritePlaces(List<Place> favoritePlaces) {
+		this.favoritePlaces = favoritePlaces;
+	}
+
+	
 }
