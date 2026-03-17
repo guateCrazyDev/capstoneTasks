@@ -62,7 +62,7 @@ public class CommentsServiceImpl implements CommentsService {
 		}
 	}
 
-	public void createComm(CommentRecord commR, List<MultipartFile> files, String userName, String placeName) {
+	public List<String> createComm(CommentRecord commR, List<MultipartFile> files, String userName, String placeName) {
 		if (userRepository.findByUsername(userName) != null && placeRepo.findByName(placeName) != null) {
 			Comments comment = new Comments();
 			Optional<User> userOp = userRepository.findByUsername(userName);
@@ -77,12 +77,15 @@ public class CommentsServiceImpl implements CommentsService {
 			comment.setPlace(place);
 			comment = commsRepo.save(comment);
 			List<PicturesComments> pics = new ArrayList();
+			List<String> paths = new ArrayList();
 			for (MultipartFile file : files) {
+				String path = storeFile(file); 
 				PicturesComments pic = new PicturesComments();
-				pic.setPath(storeFile(file));
+				pic.setPath(path);
 				pic.setComment(comment);
 				pic = picsCommsRepo.save(pic);
 				pics.add(pic);
+				paths.add(path);
 			}
 			comment.setPicturesComms(pics);
 			comment = commsRepo.save(comment);
@@ -90,6 +93,7 @@ public class CommentsServiceImpl implements CommentsService {
 			comments.add(comment);
 			comments.sort(new CommentDateComparator());
 			placeRepo.save(place);
+			return paths;
 		} else {
 			throw new ElementNotFoundException("Place or User doenst exists");
 		}

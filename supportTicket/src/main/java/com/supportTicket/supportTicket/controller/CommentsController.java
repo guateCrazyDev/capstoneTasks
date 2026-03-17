@@ -23,12 +23,12 @@ public class CommentsController {
 	CommentsService commService;
 	
 	@PostMapping("/comment")
-	public ResponseEntity<Boolean> addComment(
+	public ResponseEntity<List<String>> addComment(
 			@RequestPart("commentData") CommentRecord commRecord,
 			@RequestPart("files") List<MultipartFile> files,
 			@RequestPart("userName") String userName,
 			@RequestPart("placeName") String placeName){
-		commService.createComm(commRecord,files,userName,placeName);
-		return new ResponseEntity<>(true,HttpStatus.CREATED);
+		List<String> paths = commService.createComm(commRecord,files,userName,placeName);
+		return new ResponseEntity<>(paths,HttpStatus.CREATED);
 	}
 }
