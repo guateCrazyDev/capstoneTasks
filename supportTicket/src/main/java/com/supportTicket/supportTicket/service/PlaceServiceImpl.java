@@ -3,7 +3,9 @@ package com.supportTicket.supportTicket.service;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -11,9 +13,14 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.exceptions.ElementAlreadyExistsException;
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
-import com.supportTicket.supportTicket.model.*;
-import com.supportTicket.supportTicket.records.*;
-import com.supportTicket.supportTicket.repository.*;
+import com.supportTicket.supportTicket.model.Category;
+import com.supportTicket.supportTicket.model.PicturesPlace;
+import com.supportTicket.supportTicket.model.Place;
+import com.supportTicket.supportTicket.records.PicturesPlaceRecord;
+import com.supportTicket.supportTicket.records.PlaceRecord;
+import com.supportTicket.supportTicket.repository.CategoryRepo;
+import com.supportTicket.supportTicket.repository.PicturesPlaceRepo;
+import com.supportTicket.supportTicket.repository.PlaceRepo;
 
 @Service
 public class PlaceServiceImpl implements PlaceService {
