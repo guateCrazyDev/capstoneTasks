@@ -3,6 +3,8 @@ package com.supportTicket.supportTicket.service;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.management.RuntimeErrorException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -55,6 +57,37 @@ public class CategoryServiceImpl implements CategoryService{
 		Category category = categoryRepo.findByCategoryName(categoryName);
 		if(category != null) {
 			return new CategoryRecord(category.getCategoryName(),category.getDescription(),category.getImg());
+		}else {
+			throw new ElementNotFoundException("This category not exists");
+		}
+	}
+	
+	public void deleteCat(String cat) {
+		if(categoryRepo.findByCategoryName(cat) != null) {
+			categoryRepo.delete(categoryRepo.findByCategoryName(cat));
+		}else {
+			throw new ElementNotFoundException("This category not exists");
+		}
+	}
+	
+	public void updateCat(CategoryRecord category,MultipartFile file,String prevName) {
+		if(categoryRepo.findByCategoryName(prevName) != null) {
+			if(file == null) {
+				Category cat = categoryRepo.findByCategoryName(prevName);
+				cat.setCategoryName(category.categoryName());
+				cat.setDescription(category.description());
+				categoryRepo.save(cat);
+			}else {
+				try {
+					Category cat = categoryRepo.findByCategoryName(prevName);
+					cat.setCategoryName(category.categoryName());
+					cat.setDescription(category.description());
+					cat.setImg(file.getBytes());
+					categoryRepo.save(cat);
+				}catch(Exception e) {
+					throw new RuntimeErrorException(null, e.getMessage());
+				}
+			}
 		}else {
 			throw new ElementNotFoundException("This category not exists");
 		}

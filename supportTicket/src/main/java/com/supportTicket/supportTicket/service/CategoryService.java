@@ -10,4 +10,6 @@ public interface CategoryService {
 	CategoryRecord createCategory(CategoryRecord catRec,MultipartFile img);
 	List<CategoryRecord> getAlls();
 	CategoryRecord getCategory(String categoryName);
+	void deleteCat(String cat) ;
+	void updateCat(CategoryRecord category,MultipartFile file,String prevName);
 }

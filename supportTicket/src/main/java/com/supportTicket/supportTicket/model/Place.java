@@ -1,6 +1,8 @@
 package com.supportTicket.supportTicket.model;
 
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
@@ -8,6 +10,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 
@@ -33,12 +37,20 @@ public class Place {
 	@com.fasterxml.jackson.annotation.JsonManagedReference("place-comments")
 	private List<Comments> comms;
 	
+	@ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
+    @JoinTable(
+        name = "user_place",
+        joinColumns = @JoinColumn(name = "place_id"),
+        inverseJoinColumns = @JoinColumn(name = "user_id")
+    )
+    private Set<User> users = new HashSet<>();
+	
 	public Place() {
 		super();
 	}
-	
+
 	public Place(Long id, String name, String bestTime, String location, String description,
-			List<PicturesPlace> picturesPlace, Category category, List<Comments> comms) {
+			List<PicturesPlace> picturesPlace, Category category, List<Comments> comms, Set<User> users) {
 		super();
 		this.id = id;
 		this.name = name;
@@ -48,6 +60,7 @@ public class Place {
 		this.picturesPlace = picturesPlace;
 		this.category = category;
 		this.comms = comms;
+		this.users = users;
 	}
 
 	public Long getId() {
@@ -98,4 +111,13 @@ public class Place {
 	public void setDescription(String description) {
 		this.description = description;
 	}
+
+	public Set<User> getUsers() {
+		return users;
+	}
+
+	public void setUsers(Set<User> users) {
+		this.users = users;
+	}
+	
 }
