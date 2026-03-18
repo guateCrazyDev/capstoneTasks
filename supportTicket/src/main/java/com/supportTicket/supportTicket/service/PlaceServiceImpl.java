@@ -5,6 +5,7 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,6 +17,7 @@ import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.model.Category;
 import com.supportTicket.supportTicket.model.PicturesPlace;
 import com.supportTicket.supportTicket.model.Place;
+import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.PicturesPlaceRecord;
 import com.supportTicket.supportTicket.records.PlaceRecord;
 import com.supportTicket.supportTicket.repository.CategoryRepo;
@@ -97,6 +99,7 @@ public class PlaceServiceImpl implements PlaceService {
 					newPlace.getLocation(),
 					picsRecord,
 					category.getCategoryName(),
+					false,
 					new ArrayList<>());
 
 		} catch (Exception e) {
@@ -154,6 +157,7 @@ public class PlaceServiceImpl implements PlaceService {
 					place.getLocation(),
 					pics,
 					place.getCategory().getCategoryName(),
+					false,
 					new ArrayList<>()));
 		}
 
@@ -161,7 +165,7 @@ public class PlaceServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public List<PlaceRecord> getAllByNameCat(String categoryName) {
+	public List<PlaceRecord> getAllByNameCat(String categoryName,String userName) {
 
 		Category category = categoryRepo.findByCategoryName(categoryName);
 
@@ -180,6 +184,16 @@ public class PlaceServiceImpl implements PlaceService {
 			for (PicturesPlace p : place.getPicturesPlace()) {
 				pics.add(new PicturesPlaceRecord(p.getPath()));
 			}
+			
+			Set<User> users = place.getUsers();
+			Boolean relation = false;
+			
+			for(User user : users) {
+				if(user.getUsername().equals(userName)) {
+					relation = true;
+					break;
+				}
+			}
 
 			result.add(new PlaceRecord(
 					place.getName(),
@@ -187,6 +201,7 @@ public class PlaceServiceImpl implements PlaceService {
 					place.getLocation(),
 					pics,
 					categoryName,
+					relation,
 					new ArrayList<>()));
 		}
 

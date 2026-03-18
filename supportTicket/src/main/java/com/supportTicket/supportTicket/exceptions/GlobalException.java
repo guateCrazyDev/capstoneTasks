@@ -13,6 +13,12 @@ public class GlobalException {
 		return new ResponseEntity<>(exc.getMessage(),HttpStatus.BAD_REQUEST);
 	}
 	
+	@ExceptionHandler(PasswordException.class)
+	public ResponseEntity<String>passwordException(
+			PasswordException exc){
+		return new ResponseEntity<>(exc.getMessage(),HttpStatus.BAD_REQUEST);
+	}
+	
 	@ExceptionHandler(ElementNotFoundException.class)
 	public ResponseEntity<String> elementNotFoundException(
 			ElementNotFoundException exc){

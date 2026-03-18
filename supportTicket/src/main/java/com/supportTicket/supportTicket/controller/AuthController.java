@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.config.JwtService;
+import com.supportTicket.supportTicket.exceptions.PasswordException;
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.ChangePasswordRecord;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
@@ -68,6 +69,14 @@ public class AuthController {
 
 		if (user.isPresent()) {
 			return new ResponseEntity<>("User already exists", HttpStatus.CONFLICT);
+		}
+		
+		if (req.password().length() < 8) {
+			throw new PasswordException("Password length needs to be more large");
+		}
+		
+		if(!req.password().matches("^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[^A-Za-z0-9]).+$")) {
+			throw new PasswordException("Password must have at least one Capital character, one number and one special char");
 		}
 
 		User u = new User();

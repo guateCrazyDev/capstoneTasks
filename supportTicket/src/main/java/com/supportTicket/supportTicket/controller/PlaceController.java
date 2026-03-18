@@ -37,10 +37,10 @@ public class PlaceController {
 		return new ResponseEntity<>(places, HttpStatus.OK);
 	}
 
-	@GetMapping("/place/{categoryName}")
-	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(@PathVariable String categoryName) {
+	@GetMapping("/place/{categoryName}/userName/{userName}")
+	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(@PathVariable String categoryName,@PathVariable String userName) {
 
-		List<PlaceRecord> places = placeService.getAllByNameCat(categoryName);
+		List<PlaceRecord> places = placeService.getAllByNameCat(categoryName,userName);
 		return new ResponseEntity<>(places, HttpStatus.OK);
 	}
 
