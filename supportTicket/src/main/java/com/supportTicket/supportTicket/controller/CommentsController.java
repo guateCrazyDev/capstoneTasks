@@ -27,4 +27,12 @@ public class CommentsController {
 
 		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
+
+	@GetMapping("/place/{placeName}")
+	public ResponseEntity<List<CommentRecord>> getCommentsByPlace(@PathVariable String placeName) {
+
+		List<CommentRecord> comments = commentsService.getCommentsByPlace(placeName);
+
+		return ResponseEntity.ok(comments);
+	}
 }

@@ -89,25 +89,27 @@ public class AuthController {
 	}
 
 	@PutMapping("/update")
-	public ResponseEntity<UserRecordResponse> updateUser(
+	public ResponseEntity<?> updateUser(
 			@RequestParam String originalUsername,
 			@RequestParam String newUsername,
 			@RequestParam(required = false) MultipartFile img) {
 
-		UserRecordResponse response = userService.updateUser(originalUsername, newUsername, img);
+		Optional<User> existingUser = userService.findByUsername(newUsername);
+
+		if (existingUser.isPresent() && !newUsername.equals(originalUsername)) {
+			return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
+		}
+
+		UserRecordResponse userUpdated = userService.updateUser(originalUsername, newUsername, img);
+
+		String newToken = jwtService.generateToken(userUpdated.username());
+
+		JwtResponse response = new JwtResponse();
+		response.setJwt(newToken);
+		response.setUsername(userUpdated.username());
+		response.setImg(userUpdated.imgUrl());
 
 		return ResponseEntity.ok(response);
-	}
-
-	@PutMapping("/change-password")
-	public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRecord req) {
-
-		userService.changePassword(
-				req.username(),
-				req.oldPassword(),
-				req.newPassword());
-
-		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 
 	@GetMapping("/user/{userName}")
@@ -116,5 +118,11 @@ public class AuthController {
 		UserRecordResponse response = userService.getUserInfo(userName);
 
 		return new ResponseEntity<>(response, HttpStatus.OK);
+	}
+
+	@PutMapping("/change-password")
+	public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRecord req) {
+		userService.changePassword(req.username(), req.oldPassword(), req.newPassword());
+		return new ResponseEntity<>(true, HttpStatus.OK);
 	}
 }

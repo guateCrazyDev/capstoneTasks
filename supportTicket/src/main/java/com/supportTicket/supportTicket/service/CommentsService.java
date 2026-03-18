@@ -7,6 +7,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.supportTicket.supportTicket.records.CommentRecord;
 
 public interface CommentsService {
+	List<CommentRecord> getCommentsByPlace(String placeName);
 
 	CommentRecord createComm(
 			CommentRecord commRecord,

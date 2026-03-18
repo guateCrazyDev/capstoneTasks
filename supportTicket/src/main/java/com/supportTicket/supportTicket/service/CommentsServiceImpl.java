@@ -114,4 +114,47 @@ public class CommentsServiceImpl implements CommentsService {
 				picsRecord,
 				userRecord);
 	}
+
+	@Override
+	public List<CommentRecord> getCommentsByPlace(String placeName) {
+
+		Place place = placeRepo.findByName(placeName);
+
+		if (place == null) {
+			throw new PlaceNotFoundException(placeName);
+		}
+
+		List<Comments> comments = place.getComms();
+
+		if (comments == null) {
+			return new ArrayList<>();
+		}
+
+		comments.sort(new CommentDateComparator());
+
+		List<CommentRecord> response = new ArrayList<>();
+
+		for (Comments comment : comments) {
+
+			List<PictureCommentsRecord> pics = new ArrayList<>();
+
+			if (comment.getPicturesComms() != null) {
+				for (PicturesComments pic : comment.getPicturesComms()) {
+					pics.add(new PictureCommentsRecord(pic.getPath()));
+				}
+			}
+
+			User user = comment.getUser();
+			UserRecord userRecord = new UserRecord(user.getUsername(), user.getRole());
+
+			response.add(new CommentRecord(
+					comment.getText(),
+					comment.getRate(),
+					comment.getDate(),
+					pics,
+					userRecord));
+		}
+
+		return response;
+	}
 }
