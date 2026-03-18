@@ -72,18 +72,18 @@ public class AuthController {
 		}
 		
 		if (req.password().length() < 8) {
-			throw new PasswordException("Password length needs to be more large");
+			throw new PasswordException("Password length must be at least 8 characters length");
 		}
 		
-		if(!req.password().matches("(?=.*[A-Z])")) {
+		if(!req.password().matches(".*[A-Z].*")) {
 			throw new PasswordException("Password must have at least one capital letter");
 		}
 		
-		if(!req.password().matches("(?=.*\\d)")) {
+		if(!req.password().matches(".*\\d.*")) {
 			throw new PasswordException("Password must have at least one number");
 		}
 		
-		if(!req.password().matches("(?=.*[^A-Za-z0-9])")) {
+		if(!req.password().matches((".*[^A-Za-z0-9].*"))) {
 			throw new PasswordException("Password must have at least one special character");
 		}
 
