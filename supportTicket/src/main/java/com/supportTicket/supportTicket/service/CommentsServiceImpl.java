@@ -105,7 +105,7 @@ public class CommentsServiceImpl implements CommentsService {
 			picsRecord.add(new PictureCommentsRecord(pic.getPath()));
 		}
 
-		UserRecord userRecord = new UserRecord(user.getUsername(), user.getRole());
+		UserRecord userRecord = new UserRecord(user.getUsername(),user.getImgPath());
 
 		return new CommentRecord(
 				comment.getText(),
