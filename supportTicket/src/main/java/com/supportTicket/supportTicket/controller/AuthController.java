@@ -62,12 +62,12 @@ public class AuthController {
 	}
 
 	@PostMapping("/register")
-	public String register(@RequestBody UserRequestRecord req) {
+	public ResponseEntity<Object> register(@RequestBody UserRequestRecord req) {
 
 		Optional<User> user = userService.findByUsername(req.username());
 
 		if (user.isPresent()) {
-			return "User already exists";
+			return new ResponseEntity<>("User already exists", HttpStatus.CONFLICT);
 		}
 
 		User u = new User();
@@ -77,7 +77,15 @@ public class AuthController {
 
 		userService.saveUser(u);
 
-		return "User created";
+		var jwt = jwtService.generateToken(u.getUsername());
+
+		JwtResponse response = new JwtResponse();
+		response.setJwt(jwt);
+		response.setRole(u.getRole());
+		response.setUsername(u.getUsername());
+		response.setImg(u.getImgPath());
+
+		return new ResponseEntity<>(response, HttpStatus.CREATED);
 	}
 
 	@PutMapping("/update")
