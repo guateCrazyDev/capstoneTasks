@@ -6,6 +6,6 @@ import com.supportTicket.supportTicket.records.PlaceLigthRecord;
 
 public interface UserPlaceService {
     void createRelationship(String user, String place);
-
+    void deleteRelationship(String user, String place);
     List<PlaceLigthRecord> getAllByUserLigth(String userName);
 }

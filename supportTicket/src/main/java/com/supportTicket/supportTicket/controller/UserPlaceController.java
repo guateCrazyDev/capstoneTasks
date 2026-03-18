@@ -31,4 +31,10 @@ public class UserPlaceController {
         List<PlaceLigthRecord> places = userPService.getAllByUserLigth(userName);
         return new ResponseEntity<>(places, HttpStatus.OK);
     }
+    
+    @PutMapping("/deleterelation/user/{user}/place{place}")
+    public ResponseEntity<String> deleteRelation(@PathVariable String user, @PathVariable String place){
+    	userPService.deleteRelationship(user, place);
+    	return new ResponseEntity<>("Relation successfully deleted", HttpStatus.OK);
+    }
 }

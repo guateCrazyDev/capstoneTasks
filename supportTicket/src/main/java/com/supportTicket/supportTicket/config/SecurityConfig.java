@@ -2,6 +2,7 @@ package com.supportTicket.supportTicket.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
@@ -48,8 +49,10 @@ public class SecurityConfig {
                                                                 "/v3/api-docs/**",
                                                                 "/swagger-ui/**",
                                                                 "/swagger-ui.html",
-                                                                "/uploads/**")
-                                                .permitAll()
+                                                                "/uploads/**").permitAll()
+                                                .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/category/**").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.PUT, "/api/category/**").hasRole("ADMIN")
                                                 .anyRequest().authenticated())
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)

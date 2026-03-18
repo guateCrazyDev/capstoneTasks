@@ -13,16 +13,12 @@ public class SecurityCorsConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
 
-        // Usa orígenes explícitos (no "*") cuando allowCredentials = true
-        config.setAllowedOrigins(List.of("http://localhost:5173")); // Vite
-        // Si usas Spring Framework 6 / Boot 3 y tienes problemas con setAllowedOrigins
-        // puedes usar:
-        // config.setAllowedOriginPatterns(List.of("http://localhost:5173"));
+        config.setAllowedOrigins(List.of("http://localhost:5173"));
 
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         config.setAllowedHeaders(List.of("Authorization", "Content-Type", "X-Requested-With"));
         config.setExposedHeaders(List.of("Authorization"));
-        config.setAllowCredentials(true); // <-- Imprescindible si usas withCredentials
+        config.setAllowCredentials(true);
         config.setMaxAge(3600L);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

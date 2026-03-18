@@ -67,5 +67,20 @@ public class UserPlaceServiceImpl implements UserPlaceService {
             throw new ElementNotFoundException("There Category with that name");
         }
     }
+    
+    public void deleteRelationship(String user, String place) {
+        if (placeRepo.findByName(place) != null &&
+                userRepository.findByUsername(user) != null) {
+            Place placeI = placeRepo.findByName(place);
+            Optional<User> userI = userRepository.findByUsername(user);
+            User userIns = userI.get();
+            Set<User> users = placeI.getUsers();
+            users.remove(userIns);
+            placeI.setUsers(users);
+            placeRepo.save(placeI);
+        } else {
+            throw new ElementNotFoundException("User or place dont exists");
+        }
+    }
 
 }

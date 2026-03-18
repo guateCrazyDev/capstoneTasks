@@ -100,6 +100,7 @@ public class PlaceServiceImpl implements PlaceService {
 					picsRecord,
 					category.getCategoryName(),
 					false,
+					Integer.valueOf(0),
 					new ArrayList<>());
 
 		} catch (Exception e) {
@@ -158,6 +159,7 @@ public class PlaceServiceImpl implements PlaceService {
 					pics,
 					place.getCategory().getCategoryName(),
 					false,
+					Integer.valueOf(0),
 					new ArrayList<>()));
 		}
 
@@ -202,6 +204,7 @@ public class PlaceServiceImpl implements PlaceService {
 					pics,
 					categoryName,
 					relation,
+					place.getComms().size(),
 					new ArrayList<>()));
 		}
 
