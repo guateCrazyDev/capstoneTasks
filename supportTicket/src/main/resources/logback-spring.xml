@@ -1,0 +1,85 @@
+<configuration>
+
+    <!-- ========================= -->
+    <!-- Global properties -->
+    <!-- ========================= -->
+    <property name="APP_NAME" value="support-ticket"/>
+    <property name="LOG_PATH" value="logs"/>
+
+    <!-- ========================= -->
+    <!-- JSON FILE APPENDER -->
+    <!-- ========================= -->
+    <appender name="JSON_FILE"
+              class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+        <!-- Archivo activo -->
+        <file>${LOG_PATH}/${APP_NAME}.log</file>
+
+        <!-- Rolling por FECHA + TAMAÑO -->
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>
+                ${LOG_PATH}/${APP_NAME}.%d{yyyy-MM-dd}.%i.log
+            </fileNamePattern>
+
+            <timeBasedFileNamingAndTriggeringPolicy
+                class="ch.qos.logback.core.rolling.SizeAndTimeBasedFNATP">
+                <maxFileSize>10MB</maxFileSize>
+            </timeBasedFileNamingAndTriggeringPolicy>
+
+            <!-- Retención -->
+            <maxHistory>30</maxHistory>
+            <totalSizeCap>2GB</totalSizeCap>
+        </rollingPolicy>
+
+        <!-- ========================= -->
+        <!-- JSON ENCODER (LIMPIO) -->
+        <!-- ========================= -->
+        <encoder class="net.logstash.logback.encoder.LogstashEncoder">
+
+            <!-- Campos custom -->
+            <customFields>
+                {
+                  "app":"${APP_NAME}",
+                  "environment":"dev"
+                }
+            </customFields>
+
+            <!-- Campos a excluir (ruido) -->
+            <excludeFieldNames>
+                version,level_value
+            </excludeFieldNames>
+
+        </encoder>
+    </appender>
+    
+    
+<appender name="HTTP_JSON"
+          class="ch.qos.logback.core.rolling.RollingFileAppender">
+
+    <file>${LOG_PATH}/${APP_NAME}-http.log</file>
+
+    <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+        <fileNamePattern>
+            ${LOG_PATH}/${APP_NAME}-http.%d{yyyy-MM-dd}.log
+        </fileNamePattern>
+        <maxHistory>15</maxHistory>
+    </rollingPolicy>
+
+    <encoder class="net.logstash.logback.encoder.LogstashEncoder"/>
+</appender>
+
+<logger name="com.supportTicket.supportTicket.loggingConfig.HttpLoggingFilter"
+        level="INFO"
+        additivity="false">
+    <appender-ref ref="HTTP_JSON"/>
+</logger>
+
+
+    <!-- ========================= -->
+    <!-- ROOT LOGGER -->
+    <!-- ========================= -->
+    <root level="INFO">
+        <appender-ref ref="JSON_FILE"/>
+    </root>
+
+</configuration>
