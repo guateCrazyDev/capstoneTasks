@@ -1,5 +1,6 @@
 package com.supportTicket.supportTicket.service;
 
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -186,5 +187,46 @@ public class CommentsServiceImpl implements CommentsService {
 		}
 
 		return new CommentStatsRecord(average, count);
+	}
+	
+	public void updateComm(CommentRecord comment,CommentRecord commentNew,
+			String placeName,String userName,List<MultipartFile> images) {
+		Comments commentRes = commentsRepo.findCommentByParams(userName, placeName, comment.text(), comment.date());
+		List<PicturesComments> pictures = new ArrayList<>();
+		try {
+			if (images != null && !images.isEmpty()) {
+	
+				String uploadDir = System.getProperty("user.dir") + "/uploads/comments/";
+	
+				for (MultipartFile file : images) {
+	
+					String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+	
+					Path path = Paths.get(uploadDir + fileName);
+	
+					Files.createDirectories(path.getParent());
+					Files.write(path, file.getBytes());
+	
+					PicturesComments picture = new PicturesComments();
+	
+					picture.setPath(fileName);
+					picture.setComment(commentRes);
+	
+					pictures.add(picture);
+				}
+			}
+		}catch(IOException e) {
+			throw new RuntimeException("Error charging data");
+		}
+		
+		commentRes.setPicturesComms(pictures);
+		commentRes.setText(commentNew.text());
+		commentRes.setRate(commentNew.rate());
+		commentsRepo.save(commentRes);
+	}
+	
+	public void delete(CommentRecord comment,String placeName,String userName) {
+		Comments commentRes = commentsRepo.findCommentByParams(userName, placeName, comment.text(), comment.date());
+		commentsRepo.delete(commentRes);
 	}
 }

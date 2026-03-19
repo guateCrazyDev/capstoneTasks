@@ -139,7 +139,7 @@ public class PlaceServiceImpl implements PlaceService {
 
 			String uploadDir = System.getProperty("user.dir") + "/uploads/places/";
 
-			// 🔥 agregar nuevas imágenes (sin borrar las anteriores)
+			// 🔥 agregar nuevas imágenes ()
 			if (files != null && !files.isEmpty()) {
 
 				for (MultipartFile file : files) {

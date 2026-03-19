@@ -1,6 +1,7 @@
 package com.supportTicket.supportTicket.records;
 
 import java.sql.Date;
+import java.time.LocalDateTime;
 import java.util.List;
 
 public record CommentRecord(

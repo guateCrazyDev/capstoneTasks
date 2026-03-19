@@ -32,6 +32,7 @@ public class JwtService {
     }
 
     /**
+     * 
      * TOKEN GENERATION
      * --------------------------------
      * Creates a signed JWT using username as subject.
