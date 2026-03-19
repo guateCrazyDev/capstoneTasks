@@ -27,10 +27,9 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Skip filtering for public endpoints:
-     * - Authentication endpoints
-     * - Swagger/OpenAPI endpoints
-     * - Health checks
+     * PUBLIC ENDPOINTS FILTER SKIP
+     * --------------------------------
+     * Avoid processing JWT for endpoints that do not require authentication.
      */
     @Override
     protected boolean shouldNotFilter(HttpServletRequest request) {
@@ -44,12 +43,13 @@ public class JwtFilter extends OncePerRequestFilter {
     }
 
     /**
-     * Extracts and validates the JWT from the Authorization header.
-     * - If no token or malformed header, lets the request proceed (public routes
-     * will work; protected routes will return 401 later).
-     * - If token is invalid/expired, it also proceeds without setting
-     * authentication (so protected routes still end up 401).
-     * - If token is valid, it sets the Authentication in the SecurityContext.
+     * JWT AUTHENTICATION FLOW
+     * --------------------------------
+     * 1. Extract Authorization header
+     * 2. Validate Bearer token format
+     * 3. Extract username from token
+     * 4. Validate token
+     * 5. Set authentication in SecurityContext
      */
     @Override
     protected void doFilterInternal(HttpServletRequest request,
@@ -59,31 +59,41 @@ public class JwtFilter extends OncePerRequestFilter {
 
         final String authHeader = request.getHeader("Authorization");
 
-        // No Authorization header or not a Bearer token -> do not authenticate, just
-        // continue
+        // Step 1: Check Bearer token
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        final String token = authHeader.substring(7).trim();
+        final String token = authHeader.substring(7);
 
         String username;
+
         try {
+            // Step 2: Extract username
             username = jwtService.extractUsername(token);
-        } catch (io.jsonwebtoken.JwtException ex) {
-            // Invalid or expired token -> do not authenticate, just continue
+        } catch (Exception e) {
             filterChain.doFilter(request, response);
             return;
         }
 
-        // Authenticate only if SecurityContext doesn't already hold an Authentication
+        // Step 3: Authenticate only if not already authenticated
         if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
+
             UserDetails user = userDetailsService.loadUserByUsername(username);
+
+            // Step 4: Validate token
             if (jwtService.isTokenValid(token, user)) {
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(user, null,
+
+                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                        user,
+                        null,
                         user.getAuthorities());
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+
+                authToken.setDetails(
+                        new WebAuthenticationDetailsSource().buildDetails(request));
+
+                // Step 5: Set authentication
                 SecurityContextHolder.getContext().setAuthentication(authToken);
             }
         }

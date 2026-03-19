@@ -2,7 +2,6 @@ package com.supportTicket.supportTicket.controller;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -24,87 +23,102 @@ import com.supportTicket.supportTicket.wrappers.JwtResponse;
 @RequestMapping("/api/auth")
 public class AuthController {
 
-	@Autowired
-	private AuthenticationManager authenticationManager;
+	private final AuthenticationManager authenticationManager;
+	private final JwtService jwtService;
+	private final UserService userService;
 
-	@Autowired
-	private JwtService jwtService;
+	public AuthController(AuthenticationManager authenticationManager,
+			JwtService jwtService,
+			UserService userService) {
+		this.authenticationManager = authenticationManager;
+		this.jwtService = jwtService;
+		this.userService = userService;
+	}
 
-	@Autowired
-	private UserService userService;
-
+	/**
+	 * LOGIN
+	 * --------------------------------
+	 * - Authenticates user credentials
+	 * - Generates JWT
+	 * - Returns user info + token
+	 */
 	@PostMapping("/login")
 	public ResponseEntity<Object> login(@RequestBody UserRequestRecord user) {
 
 		try {
+			var authToken = new UsernamePasswordAuthenticationToken(
+					user.username(),
+					user.password());
 
-			var authenticationToken = new UsernamePasswordAuthenticationToken(user.username(), user.password());
+			var authentication = authenticationManager.authenticate(authToken);
 
-			var authentication = authenticationManager.authenticate(authenticationToken);
+			String jwt = jwtService.generateToken(authentication.getName());
 
-			var jwt = jwtService.generateToken(authentication.getName());
-
-			Optional<User> userOp = userService.findByUsername(user.username());
-
-			User userRes = userOp.get();
+			User userRes = userService.findByUsername(user.username())
+					.orElseThrow();
 
 			JwtResponse response = new JwtResponse();
-
 			response.setJwt(jwt);
 			response.setRole(userRes.getRole());
 			response.setUsername(userRes.getUsername());
 			response.setImg(userRes.getImgPath());
 
-			return new ResponseEntity<>(response, HttpStatus.OK);
+			return ResponseEntity.ok(response);
 
 		} catch (AuthenticationException e) {
-			return new ResponseEntity<>("Invalid credentials", HttpStatus.UNAUTHORIZED);
+			return ResponseEntity.status(HttpStatus.UNAUTHORIZED)
+					.body("Invalid credentials");
 		}
 	}
 
+	/**
+	 * REGISTER
+	 * --------------------------------
+	 * - Validates password rules
+	 * - Creates new user
+	 * - Assigns default role
+	 * - Returns JWT
+	 */
 	@PostMapping("/register")
 	public ResponseEntity<Object> register(@RequestBody UserRequestRecord req) {
 
-		Optional<User> user = userService.findByUsername(req.username());
-
-		if (user.isPresent()) {
-			return new ResponseEntity<>("User already exists", HttpStatus.CONFLICT);
-		}
-		
-		if (req.password().length() < 8) {
-			throw new PasswordException("Password length must be at least 8 characters length");
-		}
-		
-		if(!req.password().matches(".*[A-Z].*")) {
-			throw new PasswordException("Password must have at least one capital letter");
-		}
-		
-		if(!req.password().matches(".*\\d.*")) {
-			throw new PasswordException("Password must have at least one number");
-		}
-		
-		if(!req.password().matches((".*[^A-Za-z0-9].*"))) {
-			throw new PasswordException("Password must have at least one special character");
+		if (userService.findByUsername(req.username()).isPresent()) {
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body("User already exists");
 		}
 
-		User u = new User();
-		u.setUsername(req.username());
-		u.setPassword(req.password());
-		u.setRole((req.role() == null || req.role().isBlank()) ? "USER" : req.role());
+		validatePassword(req.password());
 
-		userService.saveUser(u);
+		User user = new User();
+		user.setUsername(req.username());
+		user.setPassword(req.password());
 
-		var jwt = jwtService.generateToken(u.getUsername());
+		// Always enforce ROLE_ prefix
+		String role = (req.role() == null || req.role().isBlank())
+				? "ROLE_USER"
+				: normalizeRole(req.role());
+
+		user.setRole(role);
+
+		userService.saveUser(user);
+
+		String jwt = jwtService.generateToken(user.getUsername());
 
 		JwtResponse response = new JwtResponse();
 		response.setJwt(jwt);
-		response.setRole(u.getRole());
-		response.setUsername(u.getUsername());
-		response.setImg(u.getImgPath());
+		response.setRole(user.getRole());
+		response.setUsername(user.getUsername());
+		response.setImg(user.getImgPath());
 
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		return ResponseEntity.status(HttpStatus.CREATED).body(response);
 	}
 
+	/**
+	 * UPDATE USER
+	 * --------------------------------
+	 * - Updates username and optional image
+	 * - Generates new JWT
+	 */
 	@PutMapping("/update")
 	public ResponseEntity<?> updateUser(
 			@RequestParam String originalUsername,
@@ -114,32 +128,69 @@ public class AuthController {
 		Optional<User> existingUser = userService.findByUsername(newUsername);
 
 		if (existingUser.isPresent() && !newUsername.equals(originalUsername)) {
-			return new ResponseEntity<>("Username already exists", HttpStatus.CONFLICT);
+			return ResponseEntity.status(HttpStatus.CONFLICT)
+					.body("Username already exists");
 		}
 
-		UserRecordResponse userUpdated = userService.updateUser(originalUsername, newUsername, img);
+		UserRecordResponse updated = userService.updateUser(originalUsername, newUsername, img);
 
-		String newToken = jwtService.generateToken(userUpdated.username());
+		String newToken = jwtService.generateToken(updated.username());
 
 		JwtResponse response = new JwtResponse();
 		response.setJwt(newToken);
-		response.setUsername(userUpdated.username());
-		response.setImg(userUpdated.imgUrl());
+		response.setUsername(updated.username());
+		response.setImg(updated.imgUrl());
 
 		return ResponseEntity.ok(response);
 	}
 
-	@GetMapping("/user/{userName}")
-	public ResponseEntity<UserRecordResponse> getUserInfo(@PathVariable String userName) {
-
-		UserRecordResponse response = userService.getUserInfo(userName);
-
-		return new ResponseEntity<>(response, HttpStatus.OK);
+	/**
+	 * GET USER INFO
+	 */
+	@GetMapping("/user/{username}")
+	public ResponseEntity<UserRecordResponse> getUserInfo(@PathVariable String username) {
+		return ResponseEntity.ok(userService.getUserInfo(username));
 	}
 
+	/**
+	 * CHANGE PASSWORD
+	 */
 	@PutMapping("/change-password")
 	public ResponseEntity<Boolean> changePassword(@RequestBody ChangePasswordRecord req) {
 		userService.changePassword(req.username(), req.oldPassword(), req.newPassword());
-		return new ResponseEntity<>(true, HttpStatus.OK);
+		return ResponseEntity.ok(true);
+	}
+
+	/**
+	 * PASSWORD VALIDATION
+	 * --------------------------------
+	 * Enforces strong password rules
+	 */
+	private void validatePassword(String password) {
+
+		if (password.length() < 8) {
+			throw new PasswordException("Password must be at least 8 characters");
+		}
+
+		if (!password.matches(".*[A-Z].*")) {
+			throw new PasswordException("Password must contain at least one uppercase letter");
+		}
+
+		if (!password.matches(".*\\d.*")) {
+			throw new PasswordException("Password must contain at least one number");
+		}
+
+		if (!password.matches(".*[^A-Za-z0-9].*")) {
+			throw new PasswordException("Password must contain at least one special character");
+		}
+	}
+
+	/**
+	 * ROLE NORMALIZATION
+	 * --------------------------------
+	 * Ensures roles always follow Spring Security format: ROLE_XXX
+	 */
+	private String normalizeRole(String role) {
+		return role.startsWith("ROLE_") ? role : "ROLE_" + role;
 	}
 }

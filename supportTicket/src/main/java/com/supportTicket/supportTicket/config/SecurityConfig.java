@@ -22,14 +22,11 @@ import org.springframework.web.cors.CorsConfigurationSource;
 public class SecurityConfig {
 
         /**
-         * Main Spring Security filter chain for the application.
-         * - Enables CORS using the provided CorsConfigurationSource bean.
-         * - Disables CSRF for a stateless REST API.
-         * - Sets session policy to STATELESS (JWT-based).
-         * - Exposes some public endpoints (auth, swagger, health).
-         * - Requires authentication for any other endpoint.
-         * - Registers the AuthenticationProvider (DAO) and adds the JwtFilter before
-         * UsernamePasswordAuthenticationFilter.
+         * MAIN SECURITY CONFIGURATION
+         * --------------------------------
+         * - Stateless JWT authentication
+         * - Public and protected routes
+         * - Role-based authorization
          */
         @Bean
         public SecurityFilterChain securityFilterChain(
@@ -37,33 +34,40 @@ public class SecurityConfig {
                         CorsConfigurationSource corsConfigurationSource,
                         AuthenticationProvider authenticationProvider,
                         JwtFilter jwtFilter) throws Exception {
+
                 return http
                                 .cors(cors -> cors.configurationSource(corsConfigurationSource))
                                 .csrf(csrf -> csrf.disable())
                                 .sessionManagement(session -> session
                                                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+
                                 .authorizeHttpRequests(auth -> auth
+
+                                                // PUBLIC ENDPOINTS
                                                 .requestMatchers(
                                                                 "/api/auth/**",
                                                                 "/actuator/health",
                                                                 "/v3/api-docs/**",
                                                                 "/swagger-ui/**",
                                                                 "/swagger-ui.html",
-                                                                "/uploads/**").permitAll()
-                                                .requestMatchers(HttpMethod.POST, "/api/category").hasRole("ADMIN")
-                                                .requestMatchers(HttpMethod.DELETE, "/api/category/**").hasRole("ADMIN")
+                                                                "/uploads/**")
+                                                .permitAll()
+
+                                                // ADMIN ONLY ENDPOINTS
+                                                .requestMatchers(HttpMethod.POST, "/api/category/**").hasRole("ADMIN")
                                                 .requestMatchers(HttpMethod.PUT, "/api/category/**").hasRole("ADMIN")
+                                                .requestMatchers(HttpMethod.DELETE, "/api/category/**").hasRole("ADMIN")
+
+                                                // ANY OTHER REQUEST REQUIRES AUTH
                                                 .anyRequest().authenticated())
+
                                 .authenticationProvider(authenticationProvider)
                                 .addFilterBefore(jwtFilter, UsernamePasswordAuthenticationFilter.class)
                                 .build();
         }
 
         /**
-         * Password encoder used to verify credentials against hashed passwords stored
-         * in DB.
-         * IMPORTANT: Ensure your users' passwords are stored using this encoder
-         * (BCrypt).
+         * PASSWORD ENCODER
          */
         @Bean
         public PasswordEncoder passwordEncoder() {
@@ -71,23 +75,20 @@ public class SecurityConfig {
         }
 
         /**
-         * DaoAuthenticationProvider configured with your UserDetailsService from DB and
-         * the PasswordEncoder.
-         * NOTE: Your version requires the constructor that accepts UserDetailsService.
+         * AUTHENTICATION PROVIDER
          */
         @Bean
         public AuthenticationProvider authenticationProvider(
                         UserDetailsService userDetailsService,
                         PasswordEncoder passwordEncoder) {
-                // Your version expects this constructor; setter-based configuration may not
-                // exist
+
                 DaoAuthenticationProvider provider = new DaoAuthenticationProvider(userDetailsService);
                 provider.setPasswordEncoder(passwordEncoder);
                 return provider;
         }
 
         /**
-         * AuthenticationManager built by Spring using the configured provider(s).
+         * AUTHENTICATION MANAGER
          */
         @Bean
         public AuthenticationManager authenticationManager(AuthenticationConfiguration config) throws Exception {

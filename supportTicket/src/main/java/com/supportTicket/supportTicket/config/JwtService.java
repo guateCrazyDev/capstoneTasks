@@ -19,23 +19,26 @@ public class JwtService {
     private final long expirationMillis;
 
     /**
-     * Constructs the JWT service.
-     * - The secret must be at least 32 characters for HS256 (256-bit).
-     * - expirationMillis is the token validity duration in milliseconds.
+     * INITIALIZATION
+     * --------------------------------
+     * Creates signing key and defines token expiration time.
      */
     public JwtService(
             @Value("${jwt.secret}") String secret,
             @Value("${jwt.expiration}") long expirationMillis) {
-        // Keys.hmacShaKeyFor will fail if secret is shorter than 32 bytes for HS256
+
         this.key = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationMillis = expirationMillis;
     }
 
     /**
-     * Generates a signed JWT with subject = username.
+     * TOKEN GENERATION
+     * --------------------------------
+     * Creates a signed JWT using username as subject.
      */
     public String generateToken(String username) {
         long now = System.currentTimeMillis();
+
         return Jwts.builder()
                 .setSubject(username)
                 .setIssuedAt(new Date(now))
@@ -45,33 +48,37 @@ public class JwtService {
     }
 
     /**
-     * Extracts the username (subject) from the JWT.
-     * Throws io.jsonwebtoken.JwtException for invalid/expired tokens.
+     * USERNAME EXTRACTION
+     * --------------------------------
+     * Retrieves subject (username) from token.
      */
     public String extractUsername(String token) {
         return extractAllClaims(token).getSubject();
     }
 
     /**
-     * Validates the token against a given UserDetails.
-     * Checks username match and expiration.
+     * TOKEN VALIDATION
+     * --------------------------------
+     * Checks:
+     * - Username match
+     * - Expiration
      */
     public boolean isTokenValid(String token, org.springframework.security.core.userdetails.UserDetails user) {
-        String username = extractUsername(token);
-        return username != null && username.equals(user.getUsername()) && !isTokenExpired(token);
+        return extractUsername(token).equals(user.getUsername())
+                && !isTokenExpired(token);
     }
 
     /**
-     * Returns true if the token is expired.
+     * EXPIRATION CHECK
      */
     private boolean isTokenExpired(String token) {
-        Date exp = extractAllClaims(token).getExpiration();
-        return exp.before(new Date());
+        return extractAllClaims(token).getExpiration().before(new Date());
     }
 
     /**
-     * Parses and verifies the token signature and returns all claims.
-     * Throws io.jsonwebtoken.JwtException if the token is invalid.
+     * CLAIMS EXTRACTION
+     * --------------------------------
+     * Validates signature and parses token.
      */
     private Claims extractAllClaims(String token) {
         return Jwts.parserBuilder()
