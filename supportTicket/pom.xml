@@ -39,26 +39,24 @@
 			<artifactId>spring-boot-starter-security</artifactId>
 		</dependency>
 		<dependency>
-   <groupId>io.springfox</groupId>
-   <artifactId>springfox-swagger2</artifactId>
-   <version>3.0.0</version>
-</dependency>
-<dependency>
-   <groupId>io.springfox</groupId>
-   <artifactId>springfox-swagger-ui</artifactId>
-   <version>3.0.0</version>
-</dependency>
+		   <groupId>io.springfox</groupId>
+		   <artifactId>springfox-swagger2</artifactId>
+		   <version>3.0.0</version>
+		</dependency>
+		<dependency>
+		   <groupId>io.springfox</groupId>
+		   <artifactId>springfox-swagger-ui</artifactId>
+		   <version>3.0.0</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-webmvc</artifactId>
 		</dependency>
-
-<dependency>
-    <groupId>io.github.cdimascio</groupId>
-    <artifactId>java-dotenv</artifactId>
-    <version>5.2.2</version>
-</dependency>
-
+		<dependency>
+		    <groupId>io.github.cdimascio</groupId>
+		    <artifactId>java-dotenv</artifactId>
+		    <version>5.2.2</version>
+		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -69,6 +67,11 @@
 			<groupId>org.projectlombok</groupId>
 			<artifactId>lombok</artifactId>
 			<optional>true</optional>
+		</dependency>
+		<dependency>
+		    <groupId>net.logstash.logback</groupId>
+		    <artifactId>logstash-logback-encoder</artifactId>
+		    <version>7.4</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
