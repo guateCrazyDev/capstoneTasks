@@ -123,14 +123,67 @@ public class PlaceServiceImpl implements PlaceService {
 			throw new ElementNotFoundException("Category not found");
 		}
 
+		// 🔹 actualizar datos
 		existing.setName(place.name());
 		existing.setBestTime(place.bestTime());
 		existing.setLocation(place.location());
 		existing.setCategory(category);
 
-		placeRepo.save(existing);
+		try {
 
-		return place;
+			List<PicturesPlace> pictures = existing.getPicturesPlace();
+
+			if (pictures == null) {
+				pictures = new ArrayList<>();
+			}
+
+			String uploadDir = System.getProperty("user.dir") + "/uploads/places/";
+
+			// 🔥 agregar nuevas imágenes (sin borrar las anteriores)
+			if (files != null && !files.isEmpty()) {
+
+				for (MultipartFile file : files) {
+
+					String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
+
+					Path path = Paths.get(uploadDir + fileName);
+
+					Files.createDirectories(path.getParent());
+					Files.write(path, file.getBytes());
+
+					PicturesPlace pic = new PicturesPlace();
+					pic.setPath(fileName);
+					pic.setPlace(existing); // 🔥 CRÍTICO
+
+					picturesPlaceRepo.save(pic);
+					pictures.add(pic);
+				}
+			}
+
+			existing.setPicturesPlace(pictures);
+
+			placeRepo.save(existing);
+
+			// 🔹 convertir a record
+			List<PicturesPlaceRecord> picsRecord = new ArrayList<>();
+
+			for (PicturesPlace p : pictures) {
+				picsRecord.add(new PicturesPlaceRecord(p.getPath()));
+			}
+
+			return new PlaceRecord(
+					existing.getName(),
+					existing.getBestTime(),
+					existing.getLocation(),
+					picsRecord,
+					category.getCategoryName(),
+					false,
+					existing.getComms().size(),
+					new ArrayList<>());
+
+		} catch (Exception e) {
+			throw new RuntimeException("Error updating place");
+		}
 	}
 
 	@Override
@@ -167,7 +220,7 @@ public class PlaceServiceImpl implements PlaceService {
 	}
 
 	@Override
-	public List<PlaceRecord> getAllByNameCat(String categoryName,String userName) {
+	public List<PlaceRecord> getAllByNameCat(String categoryName, String userName) {
 
 		Category category = categoryRepo.findByCategoryName(categoryName);
 
@@ -186,12 +239,12 @@ public class PlaceServiceImpl implements PlaceService {
 			for (PicturesPlace p : place.getPicturesPlace()) {
 				pics.add(new PicturesPlaceRecord(p.getPath()));
 			}
-			
+
 			Set<User> users = place.getUsers();
 			Boolean relation = false;
-			
-			for(User user : users) {
-				if(user.getUsername().equals(userName)) {
+
+			for (User user : users) {
+				if (user.getUsername().equals(userName)) {
 					relation = true;
 					break;
 				}

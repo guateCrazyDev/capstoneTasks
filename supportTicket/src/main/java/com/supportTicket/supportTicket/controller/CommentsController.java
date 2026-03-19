@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.records.CommentRecord;
+import com.supportTicket.supportTicket.records.CommentStatsRecord;
 import com.supportTicket.supportTicket.service.CommentsService;
 
 @RestController
@@ -41,5 +42,10 @@ public class CommentsController {
 		List<CommentRecord> comments = commentsService.getCommentsByPlace(placeName);
 
 		return ResponseEntity.ok(comments);
+	}
+
+	@GetMapping("/stats/{placeName}")
+	public CommentStatsRecord getStats(@PathVariable String placeName) {
+		return commentsService.getCommentsStats(placeName);
 	}
 }

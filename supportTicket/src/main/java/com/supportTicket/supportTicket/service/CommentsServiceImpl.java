@@ -105,7 +105,7 @@ public class CommentsServiceImpl implements CommentsService {
 			picsRecord.add(new PictureCommentsRecord(pic.getPath()));
 		}
 
-		UserRecord userRecord = new UserRecord(user.getUsername(),user.getImgPath());
+		UserRecord userRecord = new UserRecord(user.getUsername(), user.getImgPath());
 
 		return new CommentRecord(
 				comment.getText(),
@@ -145,7 +145,7 @@ public class CommentsServiceImpl implements CommentsService {
 			}
 
 			User user = comment.getUser();
-			UserRecord userRecord = new UserRecord(user.getUsername(), user.getRole());
+			UserRecord userRecord = new UserRecord(user.getUsername(), user.getImgPath());
 
 			response.add(new CommentRecord(
 					comment.getText(),
@@ -156,5 +156,35 @@ public class CommentsServiceImpl implements CommentsService {
 		}
 
 		return response;
+	}
+
+	@Override
+	public CommentStatsRecord getCommentsStats(String placeName) {
+
+		Place place = placeRepo.findByName(placeName);
+
+		if (place == null) {
+			throw new PlaceNotFoundException(placeName);
+		}
+
+		Object result = commentsRepo.getStatsByPlace(placeName);
+
+		double average = 0.0;
+		long count = 0;
+
+		if (result != null) {
+
+			Object[] stats = (Object[]) result;
+
+			if (stats[0] != null) {
+				average = ((Number) stats[0]).doubleValue();
+			}
+
+			if (stats[1] != null) {
+				count = ((Number) stats[1]).longValue();
+			}
+		}
+
+		return new CommentStatsRecord(average, count);
 	}
 }

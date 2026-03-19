@@ -5,14 +5,13 @@ import java.util.List;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.records.CommentRecord;
+import com.supportTicket.supportTicket.records.CommentStatsRecord;
 
 public interface CommentsService {
+
+	CommentRecord createComm(CommentRecord commR, List<MultipartFile> files, String userName, String placeName);
+
 	List<CommentRecord> getCommentsByPlace(String placeName);
 
-	CommentRecord createComm(
-			CommentRecord commRecord,
-			List<MultipartFile> files,
-			String userName,
-			String placeName);
-
+	CommentStatsRecord getCommentsStats(String placeName);
 }
