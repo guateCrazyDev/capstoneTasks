@@ -20,7 +20,7 @@ public class UserPlaceController {
     @Autowired
     UserPlaceService userPService;
 
-    @PutMapping("/user/{user}/place{place}")
+    @PutMapping("/user/{user}/place/{place}")
     public ResponseEntity<String> createRelationship(@PathVariable String user, @PathVariable String place) {
         userPService.createRelationship(user, place);
         return new ResponseEntity<>("Relation successfully created", HttpStatus.OK);
@@ -32,7 +32,7 @@ public class UserPlaceController {
         return new ResponseEntity<>(places, HttpStatus.OK);
     }
     
-    @PutMapping("/deleterelation/user/{user}/place{place}")
+    @PutMapping("/deleterelation/user/{user}/place/{place}")
     public ResponseEntity<String> deleteRelation(@PathVariable String user, @PathVariable String place){
     	userPService.deleteRelationship(user, place);
     	return new ResponseEntity<>("Relation successfully deleted", HttpStatus.OK);

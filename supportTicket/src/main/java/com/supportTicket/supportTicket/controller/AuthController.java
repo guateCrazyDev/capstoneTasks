@@ -19,6 +19,10 @@ import com.supportTicket.supportTicket.records.UserRequestRecord;
 import com.supportTicket.supportTicket.service.UserService;
 import com.supportTicket.supportTicket.wrappers.JwtResponse;
 
+/*
+ * 
+ * */
+
 @RestController
 @RequestMapping("/api/auth")
 public class AuthController {

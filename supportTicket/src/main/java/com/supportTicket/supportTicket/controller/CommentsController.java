@@ -17,6 +17,10 @@ import com.supportTicket.supportTicket.records.CommentRecord;
 import com.supportTicket.supportTicket.records.CommentStatsRecord;
 import com.supportTicket.supportTicket.service.CommentsService;
 
+/*
+ * Controller to interact with comments
+ */
+
 @RestController
 @RequestMapping("/api/comments")
 public class CommentsController {
