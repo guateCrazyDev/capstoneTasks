@@ -1,5 +1,12 @@
+# build
 /target/
+
+# env
 .env
+
+# logs
 logs/
-/logs/
-/logs
+*.log
+
+# uploads
+/uploads/

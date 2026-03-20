@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
+import com.supportTicket.supportTicket.exceptions.PasswordException;
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.UserRecordResponse;
 import com.supportTicket.supportTicket.repository.UserRepository;
@@ -24,6 +25,9 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
+
+	@Autowired
+	private FileService fileService;
 
 	@Override
 	public Optional<User> findByUsername(String username) {
@@ -42,44 +46,23 @@ public class UserServiceImpl implements UserService {
 		Optional<User> userUpdate = userRepository.findByUsername(userOg);
 
 		if (userUpdate.isEmpty()) {
-			throw new ElementNotFoundException("User not exists");
+			throw new ElementNotFoundException("User does not exists");
 		}
 
 		User user = userUpdate.get();
 		user.setUsername(newUser);
 
-		try {
-
-			if (img != null && !img.isEmpty()) {
-
-				String uploadDir = System.getProperty("user.dir") + "/uploads/users/";
-
-				String fileName = UUID.randomUUID() + "_" + img.getOriginalFilename();
-
-				Path path = Paths.get(uploadDir + fileName);
-
-				Files.createDirectories(path.getParent());
-				Files.write(path, img.getBytes());
-
-				user.setImgPath(fileName);
-			}
-
-			userRepository.save(user);
-
-			String imgUrl = null;
-
-			if (user.getImgPath() != null) {
-				imgUrl = user.getImgPath();
-			}
-
-			return new UserRecordResponse(
-					user.getUsername(),
-					user.getRole(),
-					imgUrl);
-
-		} catch (Exception e) {
-			throw new RuntimeException("Error saving image");
+		if (img != null && !img.isEmpty()) {
+			String fileName = fileService.saveImage(img);
+			user.setImgPath(fileName);
 		}
+
+		userRepository.save(user);
+
+		return new UserRecordResponse(
+				user.getUsername(),
+				user.getRole(),
+				user.getImgPath());
 	}
 
 	@Override
@@ -94,7 +77,7 @@ public class UserServiceImpl implements UserService {
 		User user = userOp.get();
 
 		if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
-			throw new RuntimeException("Old password incorrect");
+			throw new PasswordException("Incorrect current password");
 		}
 
 		user.setPassword(passwordEncoder.encode(newPassword));

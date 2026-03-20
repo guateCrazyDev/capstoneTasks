@@ -9,35 +9,41 @@ import org.springframework.web.bind.annotation.ExceptionHandler;
 public class GlobalException {
 	@ExceptionHandler(ElementAlreadyExistsException.class)
 	public ResponseEntity<String> elementAlreadyExistsException(
-			ElementAlreadyExistsException exc){
-		return new ResponseEntity<>(exc.getMessage(),HttpStatus.BAD_REQUEST);
+			ElementAlreadyExistsException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
-	
+
 	@ExceptionHandler(PasswordException.class)
-	public ResponseEntity<String>passwordException(
-			PasswordException exc){
-		return new ResponseEntity<>(exc.getMessage(),HttpStatus.BAD_REQUEST);
+	public ResponseEntity<String> passwordException(
+			PasswordException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
-	
+
 	@ExceptionHandler(ElementNotFoundException.class)
 	public ResponseEntity<String> elementNotFoundException(
-			ElementNotFoundException exc){
-		return new ResponseEntity<>(exc.getMessage(),HttpStatus.NOT_FOUND);
-	}
-	
-	@ExceptionHandler(ImageNotFoundException.class)
-	public ResponseEntity<String> imageNotFoundException(
-			ImageNotFoundException exc){
-		return new ResponseEntity<>(exc.getMessage(),HttpStatus.BAD_REQUEST);
-	}
-	
-	@ExceptionHandler(RuntimeException.class)
-	public ResponseEntity<String> exception(RuntimeException ex){
+			ElementNotFoundException ex) {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
 	}
-	
+
+	@ExceptionHandler(ImageNotFoundException.class)
+	public ResponseEntity<String> imageNotFoundException(
+			ImageNotFoundException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(ImageFileException.class)
+	public ResponseEntity<String> imageFileException(
+			ImageFileException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
+	}
+
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<String> exception(RuntimeException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
 	@ExceptionHandler(Exception.class)
-	public ResponseEntity<String> excep(Exception e){
-		return new ResponseEntity<>(e.getMessage(), HttpStatus.NOT_FOUND);
+	public ResponseEntity<String> excep(Exception ex) {
+		return new ResponseEntity<>("Unexpected error", HttpStatus.INTERNAL_SERVER_ERROR);
 	}
 }

@@ -184,9 +184,11 @@ public class AuthController {
 			throw new PasswordException("Password must contain at least one number");
 		}
 
-		if (!password.matches(".*[^A-Za-z0-9].*")) {
-			throw new PasswordException("Password must contain at least one special character");
-		}
+		// Change if necesary
+		// if (!password.matches(".*[^A-Za-z0-9].*")) {
+		// throw new PasswordException("Password must contain at least one special
+		// character");
+		// }
 	}
 
 	/**
