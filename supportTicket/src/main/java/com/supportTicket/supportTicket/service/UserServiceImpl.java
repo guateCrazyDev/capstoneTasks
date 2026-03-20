@@ -53,7 +53,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(newUser);
 
 		if (img != null && !img.isEmpty()) {
-			String fileName = fileService.saveImage(img);
+			String fileName = fileService.uploadSingleImage(img, "users");
 			user.setImgPath(fileName);
 		}
 

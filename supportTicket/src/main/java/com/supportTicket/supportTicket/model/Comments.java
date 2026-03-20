@@ -15,7 +15,7 @@ import jakarta.persistence.OneToMany;
 @Entity
 public class Comments {
 	@Id
-	@GeneratedValue(strategy=GenerationType.IDENTITY)
+	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 	private String text;
 	private Integer rate;
@@ -33,11 +33,11 @@ public class Comments {
 	@JoinColumn(name = "place_id", nullable = false)
 	@com.fasterxml.jackson.annotation.JsonBackReference("place-comments")
 	private Place place;
-	
+
 	public Comments() {
 		super();
 	}
-	
+
 	public Comments(Long id, String text, Integer rate, Date date, List<PicturesComments> picturesComms, User user,
 			Place place) {
 		super();
@@ -49,46 +49,59 @@ public class Comments {
 		this.user = user;
 		this.place = place;
 	}
-	
+
 	public Long getId() {
 		return id;
 	}
+
 	public void setId(Long id) {
 		this.id = id;
 	}
+
 	public String getText() {
 		return text;
 	}
+
 	public void setText(String text) {
 		this.text = text;
 	}
+
 	public Integer getRate() {
 		return rate;
 	}
+
 	public void setRate(Integer rate) {
 		this.rate = rate;
 	}
+
 	public Date getDate() {
 		return date;
 	}
+
 	public void setDate(Date date) {
 		this.date = date;
 	}
+
 	public List<PicturesComments> getPicturesComms() {
 		return picturesComms;
 	}
+
 	public void setPicturesComms(List<PicturesComments> picturesComms) {
 		this.picturesComms = picturesComms;
 	}
+
 	public User getUser() {
 		return user;
 	}
+
 	public void setUser(User user) {
 		this.user = user;
 	}
+
 	public Place getPlace() {
 		return place;
 	}
+
 	public void setPlace(Place place) {
 		this.place = place;
 	}

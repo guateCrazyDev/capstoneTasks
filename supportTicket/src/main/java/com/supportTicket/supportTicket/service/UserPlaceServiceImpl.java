@@ -1,8 +1,6 @@
 package com.supportTicket.supportTicket.service;
 
 import java.util.List;
-import java.util.Optional;
-import java.util.Set;
 import org.springframework.stereotype.Service;
 import com.supportTicket.supportTicket.comparators.PlaceLigthNameComparator;
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
@@ -26,15 +24,13 @@ public class UserPlaceServiceImpl implements UserPlaceService {
 
     public void createRelationship(String user, String place) {
 
-        Place placeI = Optional.ofNullable(placeRepo.findByName(place))
+        Place placeI = placeRepo.findByName(place)
                 .orElseThrow(() -> new ElementNotFoundException("Place not found"));
 
         User userIns = userRepository.findByUsername(user)
                 .orElseThrow(() -> new ElementNotFoundException("User not found"));
 
-        Set<User> users = placeI.getUsers();
-        users.add(userIns);
-        placeI.setUsers(users);
+        placeI.getUsers().add(userIns);
 
         placeRepo.save(placeI);
     }
@@ -69,15 +65,13 @@ public class UserPlaceServiceImpl implements UserPlaceService {
 
     public void deleteRelationship(String user, String place) {
 
-        Place placeI = Optional.ofNullable(placeRepo.findByName(place))
+        Place placeI = placeRepo.findByName(place)
                 .orElseThrow(() -> new ElementNotFoundException("Place not found"));
 
         User userIns = userRepository.findByUsername(user)
                 .orElseThrow(() -> new ElementNotFoundException("User not found"));
 
-        Set<User> users = placeI.getUsers();
-        users.remove(userIns);
-        placeI.setUsers(users);
+        placeI.getUsers().remove(userIns);
 
         placeRepo.save(placeI);
     }

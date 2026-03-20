@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
@@ -20,9 +21,10 @@ public class Place {
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
+	@Column(unique = true)
 	private String name;
 	private String bestTime;
-	private String Location;
+	private String location;
 	private String description;
 	@OneToMany(mappedBy = "place", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("place-pictures")
@@ -51,7 +53,7 @@ public class Place {
 		this.id = id;
 		this.name = name;
 		this.bestTime = bestTime;
-		Location = location;
+		this.location = location;
 		this.description = description;
 		this.picturesPlace = picturesPlace;
 		this.category = category;
@@ -84,11 +86,11 @@ public class Place {
 	}
 
 	public String getLocation() {
-		return Location;
+		return location;
 	}
 
 	public void setLocation(String location) {
-		Location = location;
+		this.location = location;
 	}
 
 	public List<PicturesPlace> getPicturesPlace() {

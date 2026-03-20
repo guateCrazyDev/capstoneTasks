@@ -2,63 +2,93 @@ package com.supportTicket.supportTicket.controller;
 
 import java.util.List;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.MediaType;
-import org.springframework.http.ResponseEntity;
+import org.springframework.http.*;
 import org.springframework.web.bind.annotation.*;
-
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.supportTicket.supportTicket.records.PlaceRecord;
 import com.supportTicket.supportTicket.service.PlaceService;
 
 @RestController
-@RequestMapping("/api")
+@RequestMapping("/api/places")
 public class PlaceController {
 
-	@Autowired
-	private PlaceService placeService;
+	private final PlaceService placeService;
+	private final ObjectMapper objectMapper;
 
-	@PostMapping(value = "/place", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	public PlaceController(PlaceService placeService, ObjectMapper objectMapper) {
+		this.placeService = placeService;
+		this.objectMapper = objectMapper;
+	}
+
+	// =========================
+	// CREATE (JSON + FILES)
+	// =========================
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlaceRecord> createPlace(
-			@RequestPart("placeData") PlaceRecord placeRecord,
-			@RequestPart("files") List<MultipartFile> files,
+			@RequestPart("placeData") String placeJson,
+			@RequestPart(value = "files", required = false) List<MultipartFile> files,
 			@RequestPart("categoryName") String categoryName) {
 
-		PlaceRecord response = placeService.createPlace(placeRecord, files, categoryName);
-		return new ResponseEntity<>(response, HttpStatus.CREATED);
+		try {
+			PlaceRecord placeRecord = objectMapper.readValue(placeJson, PlaceRecord.class);
+
+			return ResponseEntity.status(HttpStatus.CREATED)
+					.body(placeService.createPlace(placeRecord, files, categoryName));
+
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
-	@GetMapping("/place")
-	public ResponseEntity<List<PlaceRecord>> getAllPlaces() {
-
-		List<PlaceRecord> places = placeService.getAllByName();
-		return new ResponseEntity<>(places, HttpStatus.OK);
-	}
-
-	@GetMapping("/place/{categoryName}/userName/{userName}")
-	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(@PathVariable String categoryName,@PathVariable String userName) {
-
-		List<PlaceRecord> places = placeService.getAllByNameCat(categoryName,userName);
-		return new ResponseEntity<>(places, HttpStatus.OK);
-	}
-
-	@PutMapping(value = "/place", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+	// =========================
+	// UPDATE (JSON + FILES opcional)
+	// =========================
+	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<PlaceRecord> updatePlace(
-			@RequestPart("placeData") PlaceRecord placeRecord,
-			@RequestPart("files") List<MultipartFile> files,
+			@RequestPart("placeData") String placeJson,
+			@RequestPart(value = "files", required = false) List<MultipartFile> files,
 			@RequestPart("categoryName") String categoryName,
 			@RequestPart("originalName") String originalName) {
 
-		PlaceRecord response = placeService.updatePlace(placeRecord, files, categoryName, originalName);
-		return new ResponseEntity<>(response, HttpStatus.OK);
+		try {
+			PlaceRecord placeRecord = objectMapper.readValue(placeJson, PlaceRecord.class);
+
+			return ResponseEntity.ok(
+					placeService.updatePlace(placeRecord, files, categoryName, originalName));
+
+		} catch (Exception e) {
+			return ResponseEntity.badRequest().build();
+		}
 	}
 
-	@DeleteMapping("/place/{placeName}")
-	public ResponseEntity<String> deletePlace(@PathVariable String placeName) {
+	// =========================
+	// GET ALL
+	// =========================
+	@GetMapping
+	public ResponseEntity<List<PlaceRecord>> getAllPlaces() {
+		return ResponseEntity.ok(placeService.getAllByName());
+	}
 
+	// =========================
+	// GET BY CATEGORY + USER
+	// =========================
+	@GetMapping("/category/{categoryName}/user/{userName}")
+	public ResponseEntity<List<PlaceRecord>> getAllPlacesByCat(
+			@PathVariable String categoryName,
+			@PathVariable String userName) {
+
+		return ResponseEntity.ok(
+				placeService.getAllByNameCat(categoryName, userName));
+	}
+
+	// =========================
+	// DELETE
+	// =========================
+	@DeleteMapping("/{placeName}")
+	public ResponseEntity<String> deletePlace(@PathVariable String placeName) {
 		placeService.deletePlace(placeName);
-		return new ResponseEntity<>("Delete successfully!", HttpStatus.OK);
+		return ResponseEntity.ok("Delete successfully!");
 	}
 }
