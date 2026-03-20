@@ -10,3 +10,6 @@ logs/
 
 # uploads
 uploads/
+
+#visual
+.vscode
