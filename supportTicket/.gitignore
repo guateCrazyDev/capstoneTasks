@@ -9,4 +9,4 @@ logs/
 *.log
 
 # uploads
-/uploads/
+uploads/
