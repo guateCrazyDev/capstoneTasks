@@ -240,7 +240,7 @@ public class PlaceServiceImpl implements PlaceService {
 				String fileName = fileService.uploadSingleImage(file, "places");
 
 				PicturesPlace pic = new PicturesPlace();
-				pic.setPath(fileName); // 🔥 SOLO EL NOMBRE
+				pic.setPath(fileName);
 				pic.setPlace(place);
 
 				pics.add(pic);
