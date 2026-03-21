@@ -1,9 +1,5 @@
 package com.supportTicket.supportTicket.service;
 
-import java.io.IOException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,25 +25,19 @@ public class CommentsServiceImpl implements CommentsService {
 	@Autowired
 	private UserRepository userRepository;
 
+	@Autowired
+	private FileService fileService;
+
 	@Override
 	public CommentRecord createComm(CommentRecord commR, List<MultipartFile> files, String userName, String placeName) {
 
-		Optional<User> userOp = userRepository.findByUsername(userName);
+		User user = userRepository.findByUsername(userName)
+				.orElseThrow(() -> new UserNotFoundException(userName));
 
-		if (userOp.isEmpty()) {
-			throw new UserNotFoundException(userName);
-		}
-
-		Place place = placeRepo.findByName(placeName).orElseThrow(() -> new PlaceNotFoundException(placeName));
-
-		if (place == null) {
-			throw new PlaceNotFoundException(placeName);
-		}
-
-		User user = userOp.get();
+		Place place = placeRepo.findByName(placeName)
+				.orElseThrow(() -> new PlaceNotFoundException(placeName));
 
 		Comments comment = new Comments();
-
 		comment.setText(commR.text());
 		comment.setRate(commR.rate());
 		comment.setDate(commR.date());
@@ -56,32 +46,17 @@ public class CommentsServiceImpl implements CommentsService {
 
 		List<PicturesComments> pictures = new ArrayList<>();
 
-		try {
+		if (files != null && !files.isEmpty()) {
+			for (MultipartFile file : files) {
 
-			if (files != null && !files.isEmpty()) {
+				String fileName = fileService.uploadSingleImage(file, "comments");
 
-				String uploadDir = System.getProperty("user.dir") + "/uploads/comments/";
+				PicturesComments picture = new PicturesComments();
+				picture.setPath(fileName);
+				picture.setComment(comment);
 
-				for (MultipartFile file : files) {
-
-					String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-					Path path = Paths.get(uploadDir + fileName);
-
-					Files.createDirectories(path.getParent());
-					Files.write(path, file.getBytes());
-
-					PicturesComments picture = new PicturesComments();
-
-					picture.setPath(fileName);
-					picture.setComment(comment);
-
-					pictures.add(picture);
-				}
+				pictures.add(picture);
 			}
-
-		} catch (Exception e) {
-			throw new RuntimeException("Error saving image");
 		}
 
 		comment.setPicturesComms(pictures);
@@ -93,15 +68,12 @@ public class CommentsServiceImpl implements CommentsService {
 		}
 
 		List<Comments> comments = place.getComms();
-
 		comments.add(comment);
-
 		comments.sort(new CommentDateComparator());
 
 		placeRepo.save(place);
 
 		List<PictureCommentsRecord> picsRecord = new ArrayList<>();
-
 		for (PicturesComments pic : pictures) {
 			picsRecord.add(new PictureCommentsRecord(pic.getPath()));
 		}
@@ -119,11 +91,8 @@ public class CommentsServiceImpl implements CommentsService {
 	@Override
 	public List<CommentRecord> getCommentsByPlace(String placeName) {
 
-		Place place = placeRepo.findByName(placeName).orElseThrow(() -> new PlaceNotFoundException(placeName));
-
-		if (place == null) {
-			throw new PlaceNotFoundException(placeName);
-		}
+		Place place = placeRepo.findByName(placeName)
+				.orElseThrow(() -> new PlaceNotFoundException(placeName));
 
 		List<Comments> comments = place.getComms();
 
@@ -162,11 +131,8 @@ public class CommentsServiceImpl implements CommentsService {
 	@Override
 	public CommentStatsRecord getCommentsStats(String placeName) {
 
-		Place place = placeRepo.findByName(placeName).orElseThrow(() -> new PlaceNotFoundException(placeName));
-
-		if (place == null) {
-			throw new PlaceNotFoundException(placeName);
-		}
+		placeRepo.findByName(placeName)
+				.orElseThrow(() -> new PlaceNotFoundException(placeName));
 
 		Object result = commentsRepo.getStatsByPlace(placeName);
 
@@ -189,44 +155,57 @@ public class CommentsServiceImpl implements CommentsService {
 		return new CommentStatsRecord(average, count);
 	}
 
+	@Override
 	public void updateComm(CommentRecord comment, CommentRecord commentNew,
 			String placeName, String userName, List<MultipartFile> images) {
-		Comments commentRes = commentsRepo.findCommentByParams(userName, placeName, comment.text(), comment.date());
-		List<PicturesComments> pictures = new ArrayList<>();
-		try {
-			if (images != null && !images.isEmpty()) {
 
-				String uploadDir = System.getProperty("user.dir") + "/uploads/comments/";
+		Comments commentRes = commentsRepo.findCommentByParams(
+				userName, placeName, comment.text(), comment.date());
 
-				for (MultipartFile file : images) {
-
-					String fileName = UUID.randomUUID() + "_" + file.getOriginalFilename();
-
-					Path path = Paths.get(uploadDir + fileName);
-
-					Files.createDirectories(path.getParent());
-					Files.write(path, file.getBytes());
-
-					PicturesComments picture = new PicturesComments();
-
-					picture.setPath(fileName);
-					picture.setComment(commentRes);
-
-					pictures.add(picture);
-				}
-			}
-		} catch (IOException e) {
-			throw new RuntimeException("Error charging data");
+		if (commentRes == null) {
+			throw new RuntimeException("Comment not found");
 		}
 
-		commentRes.setPicturesComms(pictures);
+		List<PicturesComments> newPictures = new ArrayList<>();
+
+		if (images != null && !images.isEmpty()) {
+			for (MultipartFile file : images) {
+
+				String fileName = fileService.uploadSingleImage(file, "comments");
+
+				PicturesComments picture = new PicturesComments();
+				picture.setPath(fileName);
+				picture.setComment(commentRes);
+
+				newPictures.add(picture);
+			}
+		}
+
+		List<PicturesComments> existing = commentRes.getPicturesComms();
+
+		if (existing == null) {
+			existing = new ArrayList<>();
+		}
+
+		existing.addAll(newPictures);
+
+		commentRes.setPicturesComms(existing);
 		commentRes.setText(commentNew.text());
 		commentRes.setRate(commentNew.rate());
+
 		commentsRepo.save(commentRes);
 	}
 
+	@Override
 	public void delete(CommentRecord comment, String placeName, String userName) {
-		Comments commentRes = commentsRepo.findCommentByParams(userName, placeName, comment.text(), comment.date());
+
+		Comments commentRes = commentsRepo.findCommentByParams(
+				userName, placeName, comment.text(), comment.date());
+
+		if (commentRes == null) {
+			throw new RuntimeException("Comment not found");
+		}
+
 		commentsRepo.delete(commentRes);
 	}
 }

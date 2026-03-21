@@ -26,7 +26,7 @@ public class PlaceController {
 	// CREATE (JSON + FILES)
 	// =========================
 	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<PlaceRecord> createPlace(
+	public ResponseEntity<?> createPlace(
 			@RequestPart("placeData") String placeJson,
 			@RequestPart(value = "files", required = false) List<MultipartFile> files,
 			@RequestPart("categoryName") String categoryName) {
@@ -38,7 +38,8 @@ public class PlaceController {
 					.body(placeService.createPlace(placeRecord, files, categoryName));
 
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest()
+					.body(e.getMessage());
 		}
 	}
 
@@ -46,7 +47,7 @@ public class PlaceController {
 	// UPDATE (JSON + FILES opcional)
 	// =========================
 	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-	public ResponseEntity<PlaceRecord> updatePlace(
+	public ResponseEntity<?> updatePlace(
 			@RequestPart("placeData") String placeJson,
 			@RequestPart(value = "files", required = false) List<MultipartFile> files,
 			@RequestPart("categoryName") String categoryName,
@@ -59,7 +60,8 @@ public class PlaceController {
 					placeService.updatePlace(placeRecord, files, categoryName, originalName));
 
 		} catch (Exception e) {
-			return ResponseEntity.badRequest().build();
+			return ResponseEntity.badRequest()
+					.body(e.getMessage());
 		}
 	}
 

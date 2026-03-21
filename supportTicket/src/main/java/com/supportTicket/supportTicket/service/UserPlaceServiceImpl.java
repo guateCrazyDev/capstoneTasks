@@ -56,7 +56,8 @@ public class UserPlaceServiceImpl implements UserPlaceService {
                     place.getName(),
                     place.getBestTime(),
                     place.getLocation(),
-                    pics);
+                    pics,
+                    place.getCategory().getCategoryName());
 
         }).sorted(new PlaceLigthNameComparator()).toList();
 

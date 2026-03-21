@@ -1,12 +1,7 @@
 package com.supportTicket.supportTicket.service;
 
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,6 +20,9 @@ public class CategoryServiceImpl implements CategoryService {
 	@Autowired
 	private CategoryRepo categoryRepo;
 
+	@Autowired
+	private FileService fileService;
+
 	@Override
 	public List<CategoryRecord> getAlls() {
 
@@ -37,13 +35,10 @@ public class CategoryServiceImpl implements CategoryService {
 		List<CategoryRecord> records = new ArrayList<>();
 
 		for (Category cat : categories) {
-
-			CategoryRecord record = new CategoryRecord(
+			records.add(new CategoryRecord(
 					cat.getCategoryName(),
 					cat.getDescription(),
-					cat.getImagePath());
-
-			records.add(record);
+					cat.getImagePath()));
 		}
 
 		return records.stream()
@@ -57,40 +52,25 @@ public class CategoryServiceImpl implements CategoryService {
 		Category existing = categoryRepo.findByCategoryName(catRec.categoryName());
 
 		if (existing != null) {
-			throw new ElementAlreadyExistsException("Category already exists: " + catRec.categoryName());
+			throw new ElementAlreadyExistsException(
+					"Category already exists: " + catRec.categoryName());
 		}
 
 		Category category = new Category();
-
 		category.setCategoryName(catRec.categoryName());
 		category.setDescription(catRec.description());
 
-		try {
-
-			if (img != null && !img.isEmpty()) {
-
-				String uploadDir = System.getProperty("user.dir") + "/uploads/categories/";
-
-				String fileName = UUID.randomUUID() + "_" + img.getOriginalFilename();
-
-				Path path = Paths.get(uploadDir + fileName);
-
-				Files.createDirectories(path.getParent());
-				Files.write(path, img.getBytes());
-
-				category.setImagePath(fileName);
-			}
-
-			categoryRepo.save(category);
-
-			return new CategoryRecord(
-					category.getCategoryName(),
-					category.getDescription(),
-					category.getImagePath());
-
-		} catch (Exception e) {
-			throw new RuntimeException("Error saving image");
+		if (img != null && !img.isEmpty()) {
+			String fileName = fileService.uploadSingleImage(img, "categories");
+			category.setImagePath(fileName);
 		}
+
+		categoryRepo.save(category);
+
+		return new CategoryRecord(
+				category.getCategoryName(),
+				category.getDescription(),
+				category.getImagePath());
 	}
 
 	@Override
@@ -117,31 +97,16 @@ public class CategoryServiceImpl implements CategoryService {
 		category.setCategoryName(catRec.categoryName());
 		category.setDescription(catRec.description());
 
-		try {
-
-			if (img != null && !img.isEmpty()) {
-
-				String uploadDir = System.getProperty("user.dir") + "/uploads/categories/";
-
-				String fileName = UUID.randomUUID() + "_" + img.getOriginalFilename();
-
-				Path path = Paths.get(uploadDir + fileName);
-
-				Files.createDirectories(path.getParent());
-				Files.write(path, img.getBytes());
-
-				category.setImagePath(fileName);
-			}
-
-			categoryRepo.save(category);
-
-			return new CategoryRecord(
-					category.getCategoryName(),
-					category.getDescription(),
-					category.getImagePath());
-
-		} catch (Exception e) {
-			throw new RuntimeException("Error updating image");
+		if (img != null && !img.isEmpty()) {
+			String fileName = fileService.uploadSingleImage(img, "categories");
+			category.setImagePath(fileName);
 		}
+
+		categoryRepo.save(category);
+
+		return new CategoryRecord(
+				category.getCategoryName(),
+				category.getDescription(),
+				category.getImagePath());
 	}
 }
