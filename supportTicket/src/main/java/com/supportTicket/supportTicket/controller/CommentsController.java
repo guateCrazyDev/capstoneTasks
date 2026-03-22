@@ -54,24 +54,22 @@ public class CommentsController {
 	public CommentStatsRecord getStats(@PathVariable String placeName) {
 		return commentsService.getCommentsStats(placeName);
 	}
-	
-	@PutMapping("/comment")
+
+	@PutMapping
 	public ResponseEntity<String> updateComm(
 			@RequestPart("commentData") CommentRecord commRecord,
 			@RequestPart("newCommentData") CommentRecord commRecordNew,
 			@RequestPart("placeName") String placeName,
-			@RequestPart("userName") String user,
-			@RequestPart("images") List<MultipartFile> img){
-		commentsService.updateComm(commRecord,commRecordNew,placeName,user,img);
-		return new ResponseEntity<>("Successfully updated",HttpStatus.CREATED);
+			@RequestPart(value = "images", required = false) List<MultipartFile> img) {
+		commentsService.updateComm(commRecord, commRecordNew, placeName, img);
+		return new ResponseEntity<>("Successfully updated", HttpStatus.CREATED);
 	}
-	
-	@DeleteMapping("/comment")
+
+	@DeleteMapping
 	public ResponseEntity<String> delete(
 			@RequestPart("commentData") CommentRecord commRecord,
-			@RequestPart("placeName") String placeName,
-			@RequestPart("userName") String user){
-		commentsService.delete(commRecord,placeName,user);
-		return new ResponseEntity<>("Successfully deleted",HttpStatus.CREATED);
+			@RequestPart("placeName") String placeName) {
+		commentsService.delete(commRecord, placeName);
+		return new ResponseEntity<>("Successfully deleted", HttpStatus.CREATED);
 	}
 }

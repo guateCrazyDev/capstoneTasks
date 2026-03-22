@@ -3,10 +3,12 @@ package com.supportTicket.supportTicket.service;
 import java.util.*;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.comparators.CommentDateComparator;
+import com.supportTicket.supportTicket.exceptions.CommentNotFoundException;
 import com.supportTicket.supportTicket.exceptions.PlaceNotFoundException;
 import com.supportTicket.supportTicket.exceptions.UserNotFoundException;
 import com.supportTicket.supportTicket.model.*;
@@ -23,7 +25,7 @@ public class CommentsServiceImpl implements CommentsService {
 	private PlaceRepo placeRepo;
 
 	@Autowired
-	private UserRepository userRepository;
+	private UserRepo userRepository;
 
 	@Autowired
 	private FileService fileService;
@@ -58,8 +60,6 @@ public class CommentsServiceImpl implements CommentsService {
 				pictures.add(picture);
 			}
 		}
-
-		comment.setPicturesComms(pictures);
 
 		comment = commentsRepo.save(comment);
 
@@ -157,14 +157,13 @@ public class CommentsServiceImpl implements CommentsService {
 
 	@Override
 	public void updateComm(CommentRecord comment, CommentRecord commentNew,
-			String placeName, String userName, List<MultipartFile> images) {
+			String placeName, List<MultipartFile> images) {
+
+		String userName = SecurityContextHolder.getContext().getAuthentication().getName();
 
 		Comments commentRes = commentsRepo.findCommentByParams(
-				userName, placeName, comment.text(), comment.date());
-
-		if (commentRes == null) {
-			throw new RuntimeException("Comment not found");
-		}
+				userName, placeName, comment.text(), comment.date())
+				.orElseThrow(() -> new CommentNotFoundException("Comment not found"));
 
 		List<PicturesComments> newPictures = new ArrayList<>();
 
@@ -197,15 +196,17 @@ public class CommentsServiceImpl implements CommentsService {
 	}
 
 	@Override
-	public void delete(CommentRecord comment, String placeName, String userName) {
+	public void delete(CommentRecord commRecord, String placeName) {
 
-		Comments commentRes = commentsRepo.findCommentByParams(
-				userName, placeName, comment.text(), comment.date());
+		String user = SecurityContextHolder.getContext().getAuthentication().getName();
 
-		if (commentRes == null) {
-			throw new RuntimeException("Comment not found");
+		Comments comment = commentsRepo.findCommentByParams(user, placeName, commRecord.text(), commRecord.date())
+				.orElseThrow(() -> new CommentNotFoundException("Comment not found"));
+
+		if (!comment.getUser().getUsername().equals(user)) {
+			throw new RuntimeException("You cannot delete this comment");
 		}
 
-		commentsRepo.delete(commentRes);
+		commentsRepo.delete(comment);
 	}
 }

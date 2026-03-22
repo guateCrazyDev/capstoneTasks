@@ -14,14 +14,10 @@ import com.supportTicket.supportTicket.config.JwtService;
 import com.supportTicket.supportTicket.exceptions.PasswordException;
 import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.ChangePasswordRecord;
-import com.supportTicket.supportTicket.records.UserRecordResponse;
+import com.supportTicket.supportTicket.records.UserResponseRecord;
 import com.supportTicket.supportTicket.records.UserRequestRecord;
 import com.supportTicket.supportTicket.service.UserService;
 import com.supportTicket.supportTicket.wrappers.JwtResponse;
-
-/*
- * 
- * */
 
 @RestController
 @RequestMapping("/api/auth")
@@ -136,7 +132,7 @@ public class AuthController {
 					.body("Username already exists");
 		}
 
-		UserRecordResponse updated = userService.updateUser(originalUsername, newUsername, img);
+		UserResponseRecord updated = userService.updateUser(originalUsername, newUsername, img);
 
 		String newToken = jwtService.generateToken(updated.username());
 
@@ -152,7 +148,7 @@ public class AuthController {
 	 * GET USER INFO
 	 */
 	@GetMapping("/user/{username}")
-	public ResponseEntity<UserRecordResponse> getUserInfo(@PathVariable String username) {
+	public ResponseEntity<UserResponseRecord> getUserInfo(@PathVariable String username) {
 		return ResponseEntity.ok(userService.getUserInfo(username));
 	}
 

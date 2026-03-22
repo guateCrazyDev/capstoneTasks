@@ -9,14 +9,14 @@ import org.springframework.web.multipart.MultipartFile;
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.exceptions.PasswordException;
 import com.supportTicket.supportTicket.model.User;
-import com.supportTicket.supportTicket.records.UserRecordResponse;
-import com.supportTicket.supportTicket.repository.UserRepository;
+import com.supportTicket.supportTicket.records.UserResponseRecord;
+import com.supportTicket.supportTicket.repository.UserRepo;
 
 @Service
 public class UserServiceImpl implements UserService {
 
 	@Autowired
-	private UserRepository userRepository;
+	private UserRepo userRepo;
 
 	@Autowired
 	private PasswordEncoder passwordEncoder;
@@ -26,19 +26,19 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public Optional<User> findByUsername(String username) {
-		return userRepository.findByUsername(username);
+		return userRepo.findByUsername(username);
 	}
 
 	@Override
 	public User saveUser(User user) {
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
-		return userRepository.save(user);
+		return userRepo.save(user);
 	}
 
 	@Override
-	public UserRecordResponse updateUser(String userOg, String newUser, MultipartFile img) {
+	public UserResponseRecord updateUser(String userOg, String newUser, MultipartFile img) {
 
-		Optional<User> userUpdate = userRepository.findByUsername(userOg);
+		Optional<User> userUpdate = userRepo.findByUsername(userOg);
 
 		if (userUpdate.isEmpty()) {
 			throw new ElementNotFoundException("User does not exists");
@@ -52,9 +52,9 @@ public class UserServiceImpl implements UserService {
 			user.setImgPath(fileName);
 		}
 
-		userRepository.save(user);
+		userRepo.save(user);
 
-		return new UserRecordResponse(
+		return new UserResponseRecord(
 				user.getUsername(),
 				user.getRole(),
 				user.getImgPath());
@@ -63,7 +63,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public boolean changePassword(String username, String oldPassword, String newPassword) {
 
-		Optional<User> userOp = userRepository.findByUsername(username);
+		Optional<User> userOp = userRepo.findByUsername(username);
 
 		if (userOp.isEmpty()) {
 			throw new ElementNotFoundException("User not found");
@@ -77,15 +77,15 @@ public class UserServiceImpl implements UserService {
 
 		user.setPassword(passwordEncoder.encode(newPassword));
 
-		userRepository.save(user);
+		userRepo.save(user);
 
 		return true;
 	}
 
 	@Override
-	public UserRecordResponse getUserInfo(String userName) {
+	public UserResponseRecord getUserInfo(String userName) {
 
-		Optional<User> userBase = userRepository.findByUsername(userName);
+		Optional<User> userBase = userRepo.findByUsername(userName);
 
 		if (userBase.isEmpty()) {
 			throw new ElementNotFoundException("User not found");
@@ -93,7 +93,7 @@ public class UserServiceImpl implements UserService {
 
 		User user = userBase.get();
 
-		return new UserRecordResponse(
+		return new UserResponseRecord(
 				user.getUsername(),
 				user.getRole(),
 				user.getImgPath());

@@ -13,6 +13,12 @@ public class GlobalException {
 		return new ResponseEntity<>(ex.getMessage(), HttpStatus.BAD_REQUEST);
 	}
 
+	@ExceptionHandler(CommentNotFoundException.class)
+	public ResponseEntity<String> commentNotFoundException(
+			PasswordException ex) {
+		return new ResponseEntity<>(ex.getMessage(), HttpStatus.NOT_FOUND);
+	}
+
 	@ExceptionHandler(PasswordException.class)
 	public ResponseEntity<String> passwordException(
 			PasswordException ex) {

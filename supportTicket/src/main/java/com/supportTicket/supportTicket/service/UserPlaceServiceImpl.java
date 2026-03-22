@@ -9,15 +9,15 @@ import com.supportTicket.supportTicket.model.User;
 import com.supportTicket.supportTicket.records.PicturesPlaceRecord;
 import com.supportTicket.supportTicket.records.PlaceLigthRecord;
 import com.supportTicket.supportTicket.repository.PlaceRepo;
-import com.supportTicket.supportTicket.repository.UserRepository;
+import com.supportTicket.supportTicket.repository.UserRepo;
 
 @Service
 public class UserPlaceServiceImpl implements UserPlaceService {
 
-    private final UserRepository userRepository;
+    private final UserRepo userRepository;
     private final PlaceRepo placeRepo;
 
-    public UserPlaceServiceImpl(UserRepository userRepository, PlaceRepo placeRepo) {
+    public UserPlaceServiceImpl(UserRepo userRepository, PlaceRepo placeRepo) {
         this.userRepository = userRepository;
         this.placeRepo = placeRepo;
     }

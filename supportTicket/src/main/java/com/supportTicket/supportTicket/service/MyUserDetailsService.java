@@ -6,16 +6,16 @@ import org.springframework.stereotype.Service;
 
 import com.supportTicket.supportTicket.exceptions.ElementNotFoundException;
 import com.supportTicket.supportTicket.model.User;
-import com.supportTicket.supportTicket.repository.UserRepository;
+import com.supportTicket.supportTicket.repository.UserRepo;
 
 import java.util.List;
 
 @Service
 public class MyUserDetailsService implements UserDetailsService {
 
-    private final UserRepository userRepository;
+    private final UserRepo userRepository;
 
-    public MyUserDetailsService(UserRepository userRepository) {
+    public MyUserDetailsService(UserRepo userRepository) {
         this.userRepository = userRepository;
     }
 

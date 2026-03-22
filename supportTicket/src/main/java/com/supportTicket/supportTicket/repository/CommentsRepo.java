@@ -1,6 +1,8 @@
 package com.supportTicket.supportTicket.repository;
 
 import java.sql.Date;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -22,7 +24,8 @@ public interface CommentsRepo extends JpaRepository<Comments, Long> {
 			  		AND c.text = :text
 			  		AND c.date = :Date
 			""")
-	Comments findCommentByParams(@Param("username") String username,
+
+	Optional<Comments> findCommentByParams(@Param("username") String username,
 			@Param("placename") String placename,
 			@Param("text") String text,
 			@Param("Date") Date date);

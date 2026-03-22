@@ -5,7 +5,7 @@ import java.util.Optional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.model.User;
-import com.supportTicket.supportTicket.records.UserRecordResponse;
+import com.supportTicket.supportTicket.records.UserResponseRecord;
 
 public interface UserService {
 
@@ -13,9 +13,9 @@ public interface UserService {
 
 	User saveUser(User user);
 
-	UserRecordResponse updateUser(String userOg, String newUser, MultipartFile img);
+	UserResponseRecord updateUser(String userOg, String newUser, MultipartFile img);
 
 	boolean changePassword(String username, String oldPassword, String newPassword);
 
-	UserRecordResponse getUserInfo(String userName);
+	UserResponseRecord getUserInfo(String userName);
 }

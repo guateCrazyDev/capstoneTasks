@@ -14,9 +14,9 @@ public interface CommentsService {
 	List<CommentRecord> getCommentsByPlace(String placeName);
 
 	CommentStatsRecord getCommentsStats(String placeName);
-	
-	void updateComm(CommentRecord comment,CommentRecord commentNew,
-			String placeName,String userName,List<MultipartFile> images);
-	
-	void delete(CommentRecord comment,String placeName,String userName);
+
+	void updateComm(CommentRecord comment, CommentRecord commentNew,
+			String placeName, List<MultipartFile> images);
+
+	void delete(CommentRecord comment, String placeName);
 }
