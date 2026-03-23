@@ -11,7 +11,7 @@ public interface UserService {
 
 	Optional<User> findByUsername(String username);
 
-	User saveUser(User user);
+	User saveUser(User user, MultipartFile img);
 
 	UserResponseRecord updateUser(String userOg, String newUser, MultipartFile img);
 

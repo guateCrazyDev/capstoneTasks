@@ -1,6 +1,7 @@
 package com.supportTicket.supportTicket.service;
 
 import java.util.Optional;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -29,22 +30,32 @@ public class UserServiceImpl implements UserService {
 		return userRepo.findByUsername(username);
 	}
 
+	/* ===================== SAVE USER ===================== */
+
 	@Override
-	public User saveUser(User user) {
+	public User saveUser(User user, MultipartFile img) {
+
 		user.setPassword(passwordEncoder.encode(user.getPassword()));
+
+		if (img != null && !img.isEmpty()) {
+			String fileName = fileService.uploadSingleImage(img, "users");
+			user.setImgPath(fileName);
+		}
+
 		return userRepo.save(user);
 	}
 
+	/* ===================== UPDATE USER ===================== */
+
 	@Override
-	public UserResponseRecord updateUser(String userOg, String newUser, MultipartFile img) {
+	public UserResponseRecord updateUser(
+			String userOg,
+			String newUser,
+			MultipartFile img) {
 
-		Optional<User> userUpdate = userRepo.findByUsername(userOg);
+		User user = userRepo.findByUsername(userOg)
+				.orElseThrow(() -> new ElementNotFoundException("User does not exist"));
 
-		if (userUpdate.isEmpty()) {
-			throw new ElementNotFoundException("User does not exists");
-		}
-
-		User user = userUpdate.get();
 		user.setUsername(newUser);
 
 		if (img != null && !img.isEmpty()) {
@@ -60,38 +71,34 @@ public class UserServiceImpl implements UserService {
 				user.getImgPath());
 	}
 
+	/* ===================== CHANGE PASSWORD ===================== */
+
 	@Override
-	public boolean changePassword(String username, String oldPassword, String newPassword) {
+	public boolean changePassword(
+			String username,
+			String oldPassword,
+			String newPassword) {
 
-		Optional<User> userOp = userRepo.findByUsername(username);
-
-		if (userOp.isEmpty()) {
-			throw new ElementNotFoundException("User not found");
-		}
-
-		User user = userOp.get();
+		User user = userRepo.findByUsername(username)
+				.orElseThrow(() -> new ElementNotFoundException("User not found"));
 
 		if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
 			throw new PasswordException("Incorrect current password");
 		}
 
 		user.setPassword(passwordEncoder.encode(newPassword));
-
 		userRepo.save(user);
 
 		return true;
 	}
 
+	/* ===================== GET USER INFO ===================== */
+
 	@Override
 	public UserResponseRecord getUserInfo(String userName) {
 
-		Optional<User> userBase = userRepo.findByUsername(userName);
-
-		if (userBase.isEmpty()) {
-			throw new ElementNotFoundException("User not found");
-		}
-
-		User user = userBase.get();
+		User user = userRepo.findByUsername(userName)
+				.orElseThrow(() -> new ElementNotFoundException("User not found"));
 
 		return new UserResponseRecord(
 				user.getUsername(),
