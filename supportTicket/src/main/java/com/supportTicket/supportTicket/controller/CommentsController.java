@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -19,10 +21,6 @@ import com.supportTicket.supportTicket.records.CommentRecord;
 import com.supportTicket.supportTicket.records.CommentStatsRecord;
 import com.supportTicket.supportTicket.service.CommentsService;
 
-/*
- * Controller to interact with comments
- */
-
 @RestController
 @RequestMapping("/api/comments")
 public class CommentsController {
@@ -30,12 +28,12 @@ public class CommentsController {
 	@Autowired
 	private CommentsService commentsService;
 
-	@PostMapping(consumes = { "multipart/form-data" })
+	@PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<CommentRecord> addComment(
 			@RequestPart("commentData") CommentRecord commRecord,
 			@RequestPart(value = "files", required = false) List<MultipartFile> files,
-			@RequestPart("userName") String userName,
-			@RequestPart("placeName") String placeName) {
+			@RequestParam String userName,
+			@RequestParam String placeName) {
 
 		CommentRecord response = commentsService.createComm(commRecord, files, userName, placeName);
 
@@ -43,11 +41,10 @@ public class CommentsController {
 	}
 
 	@GetMapping("/place/{placeName}")
-	public ResponseEntity<List<CommentRecord>> getCommentsByPlace(@PathVariable String placeName) {
-
-		List<CommentRecord> comments = commentsService.getCommentsByPlace(placeName);
-
-		return ResponseEntity.ok(comments);
+	public ResponseEntity<List<CommentRecord>> getCommentsByPlace(
+			@PathVariable String placeName) {
+		return ResponseEntity.ok(
+				commentsService.getCommentsByPlace(placeName));
 	}
 
 	@GetMapping("/stats/{placeName}")
@@ -55,21 +52,25 @@ public class CommentsController {
 		return commentsService.getCommentsStats(placeName);
 	}
 
-	@PutMapping
+	@PutMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> updateComm(
-			@RequestPart("commentData") CommentRecord commRecord,
-			@RequestPart("newCommentData") CommentRecord commRecordNew,
-			@RequestPart("placeName") String placeName,
-			@RequestPart(value = "images", required = false) List<MultipartFile> img) {
-		commentsService.updateComm(commRecord, commRecordNew, placeName, img);
-		return new ResponseEntity<>("Successfully updated", HttpStatus.CREATED);
+			@RequestPart("commentData") CommentRecord oldComment,
+			@RequestPart("newCommentData") CommentRecord newComment,
+			@RequestParam String placeName,
+			@RequestPart(value = "images", required = false) List<MultipartFile> images) {
+
+		commentsService.updateComm(oldComment, newComment, placeName, images);
+
+		return ResponseEntity.ok("Successfully updated");
 	}
 
-	@DeleteMapping
+	@DeleteMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public ResponseEntity<String> delete(
 			@RequestPart("commentData") CommentRecord commRecord,
-			@RequestPart("placeName") String placeName) {
+			@RequestParam String placeName) {
+
 		commentsService.delete(commRecord, placeName);
-		return new ResponseEntity<>("Successfully deleted", HttpStatus.CREATED);
+
+		return ResponseEntity.ok("Successfully deleted");
 	}
 }
