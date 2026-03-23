@@ -1,16 +1,19 @@
 package com.supportTicket.supportTicket.service;
 
+import java.io.File;
+import java.util.List;
+import java.util.UUID;
+
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.supportTicket.supportTicket.exceptions.ImageFileException;
 
-import java.io.File;
-import java.util.List;
-import java.util.UUID;
-
 @Service
 public class FileService {
+    @Value("${file.upload-dir}")
+    private String baseDir;
 
     public void validateImage(MultipartFile file) {
 
@@ -56,14 +59,14 @@ public class FileService {
 
             String fileName = UUID.randomUUID() + "." + extension;
 
-            String uploadDir = System.getProperty("user.dir") + "/uploads/" + folder + "/";
+            String uploadDir = baseDir + File.separator + folder;
 
             File dir = new File(uploadDir);
             if (!dir.exists()) {
                 dir.mkdirs();
             }
 
-            file.transferTo(new File(uploadDir + fileName));
+            file.transferTo(new File(uploadDir + File.separator + fileName));
 
             return fileName;
 
