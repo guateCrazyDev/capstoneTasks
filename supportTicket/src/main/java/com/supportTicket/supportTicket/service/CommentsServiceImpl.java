@@ -1,6 +1,7 @@
 package com.supportTicket.supportTicket.service;
 
-import java.util.*;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -11,9 +12,17 @@ import com.supportTicket.supportTicket.comparators.CommentDateComparator;
 import com.supportTicket.supportTicket.exceptions.CommentNotFoundException;
 import com.supportTicket.supportTicket.exceptions.PlaceNotFoundException;
 import com.supportTicket.supportTicket.exceptions.UserNotFoundException;
-import com.supportTicket.supportTicket.model.*;
-import com.supportTicket.supportTicket.records.*;
-import com.supportTicket.supportTicket.repository.*;
+import com.supportTicket.supportTicket.model.Comments;
+import com.supportTicket.supportTicket.model.PicturesComments;
+import com.supportTicket.supportTicket.model.Place;
+import com.supportTicket.supportTicket.model.User;
+import com.supportTicket.supportTicket.records.CommentRecord;
+import com.supportTicket.supportTicket.records.CommentStatsRecord;
+import com.supportTicket.supportTicket.records.PictureCommentsRecord;
+import com.supportTicket.supportTicket.records.UserRecord;
+import com.supportTicket.supportTicket.repository.CommentsRepo;
+import com.supportTicket.supportTicket.repository.PlaceRepo;
+import com.supportTicket.supportTicket.repository.UserRepo;
 
 @Service
 public class CommentsServiceImpl implements CommentsService {
@@ -31,7 +40,11 @@ public class CommentsServiceImpl implements CommentsService {
 	private FileService fileService;
 
 	@Override
-	public CommentRecord createComm(CommentRecord commR, List<MultipartFile> files, String userName, String placeName) {
+	public CommentRecord createComm(
+			CommentRecord commR,
+			List<MultipartFile> files,
+			String userName,
+			String placeName) {
 
 		User user = userRepository.findByUsername(userName)
 				.orElseThrow(() -> new UserNotFoundException(userName));
@@ -46,7 +59,7 @@ public class CommentsServiceImpl implements CommentsService {
 		comment.setUser(user);
 		comment.setPlace(place);
 
-		List<PicturesComments> pictures = new ArrayList<>();
+		comment = commentsRepo.save(comment);
 
 		if (files != null && !files.isEmpty()) {
 			for (MultipartFile file : files) {
@@ -56,25 +69,14 @@ public class CommentsServiceImpl implements CommentsService {
 				PicturesComments picture = new PicturesComments();
 				picture.setPath(fileName);
 				picture.setComment(comment);
-
-				pictures.add(picture);
+				comment.getPicturesComms().add(picture);
 			}
 		}
 
-		comment = commentsRepo.save(comment);
-
-		if (place.getComms() == null) {
-			place.setComms(new ArrayList<>());
-		}
-
-		List<Comments> comments = place.getComms();
-		comments.add(comment);
-		comments.sort(new CommentDateComparator());
-
-		placeRepo.save(place);
+		commentsRepo.save(comment);
 
 		List<PictureCommentsRecord> picsRecord = new ArrayList<>();
-		for (PicturesComments pic : pictures) {
+		for (PicturesComments pic : comment.getPicturesComms()) {
 			picsRecord.add(new PictureCommentsRecord(pic.getPath()));
 		}
 
@@ -175,8 +177,7 @@ public class CommentsServiceImpl implements CommentsService {
 				PicturesComments picture = new PicturesComments();
 				picture.setPath(fileName);
 				picture.setComment(commentRes);
-
-				newPictures.add(picture);
+				commentRes.getPicturesComms().add(picture);
 			}
 		}
 

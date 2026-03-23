@@ -1,6 +1,7 @@
 package com.supportTicket.supportTicket.model;
 
 import java.sql.Date;
+import java.util.ArrayList;
 import java.util.List;
 
 import jakarta.persistence.CascadeType;
@@ -22,7 +23,7 @@ public class Comments {
 	private Date date;
 	@OneToMany(mappedBy = "comment", cascade = CascadeType.ALL, orphanRemoval = true)
 	@com.fasterxml.jackson.annotation.JsonManagedReference("comment-pictures")
-	private List<PicturesComments> picturesComms;
+	private List<PicturesComments> picturesComms = new ArrayList<>();
 
 	@ManyToOne
 	@JoinColumn(name = "user_id", nullable = false)
